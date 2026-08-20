@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "mongoose": "^9.7.0"
+  }
+}
