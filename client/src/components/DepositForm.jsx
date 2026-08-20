@@ -25,17 +25,20 @@ function DepositForm() {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const response = await fetch("http://localhost:5000/api/deposit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        "https://bitcoin-investment-platform-ovvr.onrender.com/api/deposit",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            coin: "BTC",
+            amount: Number(amount),
+          }),
         },
-        body: JSON.stringify({
-          coin: "BTC",
-          amount: Number(amount),
-        }),
-      });
+      );
 
       const data = await response.json();
 
