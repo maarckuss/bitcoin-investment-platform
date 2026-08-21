@@ -1,16 +1,17 @@
-import { Flex } from "@chakra-ui/react";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import AdminRoute from "./utils/AdminRoute";
-
+import { Flex, Box } from "@chakra-ui/react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState } from "react";
+
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
-import { Box } from "@chakra-ui/react";
+
+import AdminRoute from "./utils/AdminRoute";
+import ProtectedRoute from "./utils/ProtectedRoute";
+
 import Dashboard from "./pages/Dashboard";
 import Deposit from "./pages/Deposit";
 import Withdrawal from "./pages/Withdrawal";
 import Login from "./pages/Login";
-import ProtectedRoute from "./utils/ProtectedRoute";
 import Transactions from "./pages/Transactions";
 import Admin from "./pages/Admin";
 import Investments from "./pages/Investments";
@@ -30,40 +31,35 @@ import AdminDeposits from "./pages/AdminDeposits";
 import AdminWithdrawals from "./pages/AdminWithdrawals";
 
 function Layout({ children }) {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(() => window.innerWidth >= 768);
 
   return (
     <Flex minH="100vh" bg="#0f172a">
-      <Sidebar isOpen={isOpen} />
+      <Sidebar
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+      />
 
-      <Box flex="1" bg="#0b1220" color="white">
-        {/* ADD NAVBAR HERE */}
-        <Navbar setIsOpen={setIsOpen} isOpen={isOpen} />
-
+      <Box flex="1" minW="0" bg="#0b1220" color="white">
+        <Navbar
+          setIsOpen={setIsOpen}
+          isOpen={isOpen}
+        />
         {children}
       </Box>
     </Flex>
   );
 }
+
 function AppRoutes() {
-  const location = useLocation();
-
-  const isAuthPage = location.pathname === "/login";
-
   return (
     <Routes>
-      {/* Default route */}
       <Route path="/" element={<Login />} />
-
-      {/* Public Route */}
       <Route path="/login" element={<Login />} />
-
       <Route path="/register" element={<Register />} />
-
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
 
-      {/* Protected Routes WITH layout */}
       <Route
         path="/dashboard"
         element={
@@ -74,22 +70,35 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
-      <Route
-        path="/testimonials"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Testimonials />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
+
       <Route
         path="/deposit"
         element={
           <ProtectedRoute>
             <Layout>
               <Deposit />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/investments"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Investments />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/my-investments"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <MyInvestments />
             </Layout>
           </ProtectedRoute>
         }
@@ -116,12 +125,24 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
       <Route
         path="/notifications"
         element={
           <ProtectedRoute>
             <Layout>
               <Notifications />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/testimonials"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Testimonials />
             </Layout>
           </ProtectedRoute>
         }
@@ -148,6 +169,7 @@ function AppRoutes() {
           </AdminRoute>
         }
       />
+
       <Route
         path="/admin/users"
         element={
@@ -180,6 +202,7 @@ function AppRoutes() {
           </AdminRoute>
         }
       />
+
       <Route
         path="/admin/withdrawals"
         element={
@@ -190,6 +213,29 @@ function AppRoutes() {
           </AdminRoute>
         }
       />
+
+      <Route
+        path="/admin/investments"
+        element={
+          <AdminRoute>
+            <Layout>
+              <AdminInvestments />
+            </Layout>
+          </AdminRoute>
+        }
+      />
+
+      <Route
+        path="/admin/plans"
+        element={
+          <AdminRoute>
+            <Layout>
+              <AdminPlans />
+            </Layout>
+          </AdminRoute>
+        }
+      />
+
       <Route
         path="/admin/testimonials"
         element={
@@ -198,48 +244,6 @@ function AppRoutes() {
               <AdminTestimonials />
             </Layout>
           </AdminRoute>
-        }
-      />
-      <Route
-        path="/admin/plans"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <AdminPlans />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/investments"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <Investments />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
-        path="/my-investments"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <MyInvestments />
-            </Layout>
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/admin/investments"
-        element={
-          <ProtectedRoute>
-            <Layout>
-              <AdminInvestments />
-            </Layout>
-          </ProtectedRoute>
         }
       />
     </Routes>

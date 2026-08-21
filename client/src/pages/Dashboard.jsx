@@ -1,14 +1,18 @@
 import { motion } from "framer-motion";
-import { Box, Text, SimpleGrid, Spinner, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Text,
+  SimpleGrid,
+  Spinner,
+  VStack,
+} from "@chakra-ui/react";
+import { useEffect, useState } from "react";
+
 import DashboardCard from "../components/DashboardCard";
 import RecentActivity from "../components/RecentActivity";
-import PortfolioChart from "../components/PortfolioChart";
-import PortfolioSummary from "../components/PortfolioSummary";
 import AccountOverview from "../components/AccountOverview";
 import BitcoinMarketChart from "../components/BitcoinMarketChart";
-
 import SecurityPanel from "../components/SecurityPanel";
-import { useEffect, useState } from "react";
 import API from "../api/axios";
 
 function Dashboard() {
@@ -42,6 +46,7 @@ function Dashboard() {
         justifyContent="center"
         alignItems="center"
         bg="#0b1220"
+        px={4}
       >
         <VStack spacing={4}>
           <Spinner
@@ -51,160 +56,135 @@ function Dashboard() {
             color="blue.400"
             size="xl"
           />
-          <Text color="gray.300">Loading dashboard...</Text>
+          <Text color="gray.300" fontSize="sm">
+            Loading dashboard...
+          </Text>
         </VStack>
       </Box>
     );
   }
 
+  const cards = [
+    {
+      title: "Available Balance",
+      value: `$${dashboard.balance || 0}`,
+    },
+    {
+      title: "Portfolio Value",
+      value: `$${dashboard.portfolioValue || 0}`,
+    },
+    {
+      title: "Total Invested",
+      value: `$${dashboard.investedAmount || 0}`,
+    },
+    {
+      title: "Expected Profit",
+      value: `$${dashboard.expectedProfit || 0}`,
+    },
+    {
+      title: "Active Investments",
+      value: dashboard.activeInvestments || 0,
+    },
+    {
+      title: "Total Deposits",
+      value: `$${dashboard.totalDeposits || 0}`,
+    },
+    {
+      title: "Total Withdrawals",
+      value: `$${dashboard.totalWithdrawals || 0}`,
+    },
+    {
+      title: "Pending Deposits",
+      value: dashboard.pendingDeposits || 0,
+    },
+    {
+      title: "Pending Withdrawals",
+      value: dashboard.pendingWithdrawals || 0,
+    },
+  ];
+
   return (
-    <Box bg="transparent" minH="100vh" p={6}>
-      <Box maxW="1200px" mx="auto">
-        <Text fontSize="3xl" fontWeight="bold" mb={8}>
-          Dashboard
-        </Text>
+    <Box
+      bg="#0b1220"
+      minH="100vh"
+      px={{ base: 4, sm: 5, md: 6 }}
+      py={{ base: 4, md: 6 }}
+      overflowX="hidden"
+    >
+      <Box
+        maxW="1200px"
+        mx="auto"
+        w="100%"
+      >
+        <Box mb={{ base: 5, md: 8 }}>
+          <Text
+            fontSize={{ base: "2xl", md: "3xl" }}
+            fontWeight="bold"
+          >
+            Dashboard
+          </Text>
 
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={6}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0 }}
-            whileHover={{ scale: 1.05 }}
+          <Text
+            mt={1}
+            fontSize={{ base: "sm", md: "md" }}
+            color="gray.400"
           >
-            <DashboardCard
-              title="Available Balance"
-              value={`$${dashboard.balance || 0}`}
-            />
-          </motion.div>
+            Welcome back. Here's an overview of your account.
+          </Text>
+        </Box>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.05 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <DashboardCard
-              title="Portfolio Value"
-              value={`$${dashboard.portfolioValue || 0}`}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <DashboardCard
-              title="Total Invested"
-              value={`$${dashboard.investedAmount || 0}`}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.15 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <DashboardCard
-              title="Expected Profit"
-              value={`$${dashboard.expectedProfit || 0}`}
-            />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <DashboardCard
-              title="Active Investments"
-              value={dashboard.activeInvestments || 0}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <DashboardCard
-              title="Total Deposits"
-              value={`$${dashboard.totalDeposits || 0}`}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <DashboardCard
-              title="Total Withdrawals"
-              value={`$${dashboard.totalWithdrawals || 0}`}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.3 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <DashboardCard
-              title="Pending Deposits"
-              value={dashboard.pendingDeposits || 0}
-            />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.4 }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <DashboardCard
-              title="Pending Withdrawals"
-              value={dashboard.pendingWithdrawals || 0}
-            />
-          </motion.div>
+        <SimpleGrid
+          columns={{
+            base: 1,
+            sm: 2,
+            xl: 3,
+          }}
+          spacing={{ base: 3, md: 5 }}
+        >
+          {cards.map((card, index) => (
+            <motion.div
+              key={card.title}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.35,
+                delay: index * 0.04,
+              }}
+              whileHover={{
+                y: -3,
+              }}
+            >
+              <DashboardCard
+                title={card.title}
+                value={card.value}
+              />
+            </motion.div>
+          ))}
         </SimpleGrid>
 
-        <Box mt={8}>
+        <Box mt={{ base: 5, md: 8 }}>
           <RecentActivity />
         </Box>
 
         <SimpleGrid
-          mt={8}
+          mt={{ base: 5, md: 8 }}
           columns={{
             base: 1,
             lg: 2,
           }}
-          spacing={6}
+          spacing={{ base: 5, md: 6 }}
         >
           <SecurityPanel />
-
           <AccountOverview />
         </SimpleGrid>
-        <Box mt={8}>
+
+        <Box
+          mt={{ base: 5, md: 8 }}
+          w="100%"
+          overflow="hidden"
+        >
           <BitcoinMarketChart />
         </Box>
-
-        <SimpleGrid
-          mt={8}
-          columns={{
-            base: 1,
-            lg: 2,
-          }}
-          spacing={6}
-        >
-          <RecentActivity />
-
-          <SecurityPanel />
-        </SimpleGrid>
       </Box>
     </Box>
   );
