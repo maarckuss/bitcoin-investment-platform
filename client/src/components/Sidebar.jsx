@@ -15,61 +15,113 @@ import {
   FiStar,
   FiX,
 } from "react-icons/fi";
-import {
-  Box,
-  Text,
-  VStack,
-  Flex,
-  IconButton,
-} from "@chakra-ui/react";
+import { Box, Flex, IconButton, Text, Tooltip, VStack } from "@chakra-ui/react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 
+const userLinks = [
+  { path: "/dashboard", label: "Dashboard", icon: FiHome },
+  { path: "/deposit", label: "Deposit Bitcoin", icon: FiDownload },
+  { path: "/investments", label: "Investment Plans", icon: FiTrendingUp },
+  { path: "/my-investments", label: "My Investments", icon: FiBriefcase },
+  { path: "/withdrawal", label: "Withdraw Bitcoin", icon: FiUpload },
+  { path: "/transactions", label: "Transactions", icon: FiRepeat },
+  { path: "/notifications", label: "Notifications", icon: FiBell },
+  { path: "/testimonials", label: "Testimonials", icon: FiStar },
+  { path: "/profile", label: "Profile", icon: FiUser },
+];
+
+const adminLinks = [
+  { path: "/admin", label: "Admin Dashboard", icon: FiBarChart2 },
+  { path: "/admin/users", label: "Users", icon: FiUsers },
+  { path: "/admin/deposits", label: "Bitcoin Deposits", icon: FiDownload },
+  { path: "/admin/withdrawals", label: "Bitcoin Withdrawals", icon: FiUpload },
+  { path: "/admin/investments", label: "Investments", icon: FiTrendingUp },
+  { path: "/admin/plans", label: "Investment Plans", icon: FiDollarSign },
+  { path: "/admin/testimonials", label: "Testimonials", icon: FiFileText },
+  { path: "/admin/logs", label: "Activity Logs", icon: FiActivity },
+];
+
 function Sidebar({ isOpen, onClose }) {
-  const token = localStorage.getItem("token");
   const location = useLocation();
+  const token = localStorage.getItem("token");
 
   let role = null;
 
   if (token) {
     try {
       role = JSON.parse(atob(token.split(".")[1])).role;
-    } catch (err) {
-      console.error(err);
+    } catch {
+      role = null;
     }
   }
 
-  const linkStyle = (path) => ({
-    w: "100%",
-    p: "10px 12px",
-    borderRadius: "10px",
-    cursor: "pointer",
-    transition: "0.2s ease",
-    display: "flex",
-    alignItems: "center",
-    gap: "10px",
-    bg:
-      location.pathname === path
-        ? "rgba(59, 130, 246, 0.15)"
-        : "transparent",
-    boxShadow:
-      location.pathname === path
-        ? "0 0 10px rgba(59,130,246,0.3)"
-        : "none",
-    borderLeft:
-      location.pathname === path
-        ? "3px solid #3b82f6"
-        : "3px solid transparent",
-    _hover: {
-      bg: "rgba(255,255,255,0.05)",
-      transform: "translateX(4px)",
-    },
-  });
-
   const handleNavigation = () => {
-    if (window.innerWidth < 768) {
+    if (window.innerWidth < 768 && onClose) {
       onClose();
     }
+  };
+
+  const renderLink = ({ path, label, icon: Icon }) => {
+    const isActive =
+      location.pathname === path ||
+      (path !== "/dashboard" && location.pathname.startsWith(`${path}/`));
+
+    return (
+      <Tooltip
+        key={path}
+        label={!isOpen ? label : undefined}
+        placement="right"
+        hasArrow
+        isDisabled={isOpen}
+      >
+        <Link to={path} onClick={handleNavigation} style={{ width: "100%" }}>
+          <Flex
+            align="center"
+            justify={isOpen ? "flex-start" : "center"}
+            gap={3}
+            w="100%"
+            minH="46px"
+            px={isOpen ? 3 : 0}
+            borderRadius="12px"
+            position="relative"
+            color={isActive ? "white" : "gray.400"}
+            bg={isActive ? "whiteAlpha.100" : "transparent"}
+            transition="all 0.2s ease"
+            _hover={{
+              color: "white",
+              bg: "whiteAlpha.100",
+              transform: "translateX(2px)",
+            }}
+          >
+            {isActive && (
+              <Box
+                position="absolute"
+                left="0"
+                top="8px"
+                bottom="8px"
+                w="3px"
+                borderRadius="full"
+                bg="orange.400"
+              />
+            )}
+
+            <Icon size={18} />
+
+            {isOpen && (
+              <Text
+                fontSize="sm"
+                fontWeight={isActive ? "600" : "500"}
+                color={path === "/admin" && isActive ? "orange.300" : "inherit"}
+                noOfLines={1}
+              >
+                {label}
+              </Text>
+            )}
+          </Flex>
+        </Link>
+      </Tooltip>
+    );
   };
 
   return (
@@ -79,63 +131,66 @@ function Sidebar({ isOpen, onClose }) {
           display={{ base: "block", md: "none" }}
           position="fixed"
           inset="0"
-          bg="rgba(0,0,0,0.55)"
-          backdropFilter="blur(2px)"
-          zIndex="999"
+          bg="blackAlpha.600"
+          backdropFilter="blur(3px)"
+          zIndex={999}
           onClick={onClose}
         />
       )}
 
       <Box
-        as={motion.div}
+        as={motion.aside}
         animate={{
-          width: isOpen ? "260px" : "80px",
+          width: isOpen ? "260px" : "78px",
+          x: 0,
         }}
-        transition={{ duration: 0.3 }}
-        minH={{ base: "100vh", md: "100vh" }}
-        bg="rgba(15,23,42,0.97)"
-        borderRight="1px solid rgba(255,255,255,0.08)"
-        color="white"
-        p={isOpen ? 6 : 3}
-        backdropFilter="blur(12px)"
-        overflow="hidden"
+        transition={{
+          duration: 0.25,
+          ease: "easeInOut",
+        }}
         position={{ base: "fixed", md: "relative" }}
         top={{ base: 0, md: "auto" }}
         left={{ base: 0, md: "auto" }}
         bottom={{ base: 0, md: "auto" }}
-        zIndex="1000"
+        zIndex={1000}
         display={{
           base: isOpen ? "block" : "none",
           md: "block",
         }}
+        minH="100vh"
+        flexShrink={0}
+        overflow="hidden"
+        borderRight="1px solid"
+        borderColor="whiteAlpha.100"
+        bg="rgba(10, 17, 32, 0.96)"
+        backdropFilter="blur(20px)"
+        color="white"
+        px={isOpen ? 4 : 3}
+        py={5}
       >
         <Flex
-          align="flex-start"
-          justify="space-between"
-          mb={isOpen ? 8 : 4}
+          align="center"
+          justify={isOpen ? "space-between" : "center"}
+          mb={8}
+          minH="48px"
         >
-          {isOpen ? (
-            <Box>
+          {isOpen && (
+            <Box minW="0">
               <Text
-                fontSize="2xl"
-                fontWeight="extrabold"
+                fontSize="xl"
+                fontWeight="800"
                 bgGradient="linear(to-r, orange.300, yellow.400)"
                 bgClip="text"
-                letterSpacing="1px"
+                noOfLines={1}
               >
                 BitcoinVault
               </Text>
 
-              <Text
-                fontSize="xs"
-                color="gray.400"
-                mt={1}
-                letterSpacing="0.5px"
-              >
-                Secure Bitcoin Wealth Management
+              <Text mt={1} fontSize="xs" color="gray.500" noOfLines={1}>
+                Wealth Management
               </Text>
             </Box>
-          ) : null}
+          )}
 
           <IconButton
             display={{ base: "flex", md: "none" }}
@@ -143,223 +198,51 @@ function Sidebar({ isOpen, onClose }) {
             icon={<FiX />}
             size="sm"
             variant="ghost"
-            color="white"
-            _hover={{
-              bg: "rgba(255,255,255,0.1)",
-            }}
+            color="gray.300"
+            borderRadius="10px"
             onClick={onClose}
+            _hover={{
+              color: "white",
+              bg: "whiteAlpha.100",
+            }}
           />
         </Flex>
 
-        <VStack
-          align={isOpen ? "start" : "center"}
-          spacing={3}
-          w="100%"
-        >
-          <Link
-            to="/dashboard"
-            style={{ width: "100%" }}
-            onClick={handleNavigation}
+        <VStack spacing={2} align="stretch">
+          <Text
+            display={{ base: "none", md: isOpen ? "block" : "none" }}
+            px={3}
+            mb={1}
+            fontSize="10px"
+            fontWeight="700"
+            color="gray.600"
+            letterSpacing="0.12em"
+            textTransform="uppercase"
           >
-            <Box {...linkStyle("/dashboard")}>
-              <FiHome />
-              {isOpen && <Text fontSize="sm">Dashboard</Text>}
-            </Box>
-          </Link>
+            Menu
+          </Text>
 
-          <Link
-            to="/deposit"
-            style={{ width: "100%" }}
-            onClick={handleNavigation}
-          >
-            <Box {...linkStyle("/deposit")}>
-              <FiDownload />
-              {isOpen && <Text fontSize="sm">Deposit Bitcoin</Text>}
-            </Box>
-          </Link>
-
-          <Link
-            to="/investments"
-            style={{ width: "100%" }}
-            onClick={handleNavigation}
-          >
-            <Box {...linkStyle("/investments")}>
-              <FiTrendingUp />
-              {isOpen && <Text fontSize="sm">Investment Plans</Text>}
-            </Box>
-          </Link>
-
-          <Link
-            to="/my-investments"
-            style={{ width: "100%" }}
-            onClick={handleNavigation}
-          >
-            <Box {...linkStyle("/my-investments")}>
-              <FiBriefcase />
-              {isOpen && <Text fontSize="sm">My Investments</Text>}
-            </Box>
-          </Link>
-
-          <Link
-            to="/withdrawal"
-            style={{ width: "100%" }}
-            onClick={handleNavigation}
-          >
-            <Box {...linkStyle("/withdrawal")}>
-              <FiUpload />
-              {isOpen && <Text fontSize="sm">Withdraw Bitcoin</Text>}
-            </Box>
-          </Link>
-
-          <Link
-            to="/transactions"
-            style={{ width: "100%" }}
-            onClick={handleNavigation}
-          >
-            <Box {...linkStyle("/transactions")}>
-              <FiRepeat />
-              {isOpen && <Text fontSize="sm">Transactions</Text>}
-            </Box>
-          </Link>
-
-          <Link
-            to="/notifications"
-            style={{ width: "100%" }}
-            onClick={handleNavigation}
-          >
-            <Box {...linkStyle("/notifications")}>
-              <FiBell />
-              {isOpen && <Text fontSize="sm">Notifications</Text>}
-            </Box>
-          </Link>
-
-          <Link
-            to="/testimonials"
-            style={{ width: "100%" }}
-            onClick={handleNavigation}
-          >
-            <Box {...linkStyle("/testimonials")}>
-              <FiStar />
-              {isOpen && <Text fontSize="sm">Testimonials</Text>}
-            </Box>
-          </Link>
-
-          <Link
-            to="/profile"
-            style={{ width: "100%" }}
-            onClick={handleNavigation}
-          >
-            <Box {...linkStyle("/profile")}>
-              <FiUser />
-              {isOpen && <Text fontSize="sm">Profile</Text>}
-            </Box>
-          </Link>
+          {userLinks.map(renderLink)}
 
           {role === "admin" && (
-            <Box mt={8} w="100%">
+            <Box mt={6}>
               {isOpen && (
-                <Text fontSize="xs" color="gray.500" mb={3}>
-                  ADMIN
+                <Text
+                  px={3}
+                  mb={2}
+                  fontSize="10px"
+                  fontWeight="700"
+                  color="gray.600"
+                  letterSpacing="0.12em"
+                  textTransform="uppercase"
+                >
+                  Administration
                 </Text>
               )}
 
-              <Link
-                to="/admin"
-                style={{ width: "100%" }}
-                onClick={handleNavigation}
-              >
-                <Box {...linkStyle("/admin")}>
-                  <FiBarChart2 />
-                  {isOpen && (
-                    <Text fontSize="sm" color="orange.300">
-                      Admin Dashboard
-                    </Text>
-                  )}
-                </Box>
-              </Link>
-
-              <Link
-                to="/admin/users"
-                style={{ width: "100%" }}
-                onClick={handleNavigation}
-              >
-                <Box {...linkStyle("/admin/users")}>
-                  <FiUsers />
-                  {isOpen && <Text fontSize="sm">Users</Text>}
-                </Box>
-              </Link>
-
-              <Link
-                to="/admin/deposits"
-                style={{ width: "100%" }}
-                onClick={handleNavigation}
-              >
-                <Box {...linkStyle("/admin/deposits")}>
-                  <FiDownload />
-                  {isOpen && (
-                    <Text fontSize="sm">Bitcoin Deposits</Text>
-                  )}
-                </Box>
-              </Link>
-
-              <Link
-                to="/admin/withdrawals"
-                style={{ width: "100%" }}
-                onClick={handleNavigation}
-              >
-                <Box {...linkStyle("/admin/withdrawals")}>
-                  <FiUpload />
-                  {isOpen && (
-                    <Text fontSize="sm">Bitcoin Withdrawals</Text>
-                  )}
-                </Box>
-              </Link>
-
-              <Link
-                to="/admin/investments"
-                style={{ width: "100%" }}
-                onClick={handleNavigation}
-              >
-                <Box {...linkStyle("/admin/investments")}>
-                  <FiTrendingUp />
-                  {isOpen && <Text fontSize="sm">Investments</Text>}
-                </Box>
-              </Link>
-
-              <Link
-                to="/admin/plans"
-                style={{ width: "100%" }}
-                onClick={handleNavigation}
-              >
-                <Box {...linkStyle("/admin/plans")}>
-                  <FiDollarSign />
-                  {isOpen && (
-                    <Text fontSize="sm">Investment Plans</Text>
-                  )}
-                </Box>
-              </Link>
-
-              <Link
-                to="/admin/testimonials"
-                style={{ width: "100%" }}
-                onClick={handleNavigation}
-              >
-                <Box {...linkStyle("/admin/testimonials")}>
-                  <FiFileText />
-                  {isOpen && <Text fontSize="sm">Testimonials</Text>}
-                </Box>
-              </Link>
-
-              <Link
-                to="/admin/logs"
-                style={{ width: "100%" }}
-                onClick={handleNavigation}
-              >
-                <Box {...linkStyle("/admin/logs")}>
-                  <FiActivity />
-                  {isOpen && <Text fontSize="sm">Activity Logs</Text>}
-                </Box>
-              </Link>
+              <VStack spacing={2} align="stretch">
+                {adminLinks.map(renderLink)}
+              </VStack>
             </Box>
           )}
         </VStack>

@@ -1,19 +1,26 @@
-import { useState, useEffect } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Box,
-  Input,
   Button,
-  Text,
-  VStack,
-  InputGroup,
-  InputRightElement,
-  IconButton,
-  HStack,
   Checkbox,
   Divider,
+  Flex,
+  IconButton,
+  Input,
+  InputGroup,
+  InputRightElement,
+  Text,
+  useToast,
+  VStack,
 } from "@chakra-ui/react";
-import { FiEye, FiEyeOff } from "react-icons/fi";
+import {
+  FiArrowRight,
+  FiCheckCircle,
+  FiEye,
+  FiEyeOff,
+  FiShield,
+} from "react-icons/fi";
 import { motion } from "framer-motion";
 import API from "../api/axios";
 
@@ -24,6 +31,7 @@ function Login() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const toast = useToast();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -31,14 +39,27 @@ function Login() {
     if (token) {
       navigate("/dashboard");
     }
-  }, []);
+  }, [navigate]);
 
   const handleLogin = async () => {
+    if (!email.trim() || !password) {
+      toast({
+        title: "Missing information",
+        description: "Enter your email and password to continue.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
+      });
+
+      return;
+    }
+
     setLoading(true);
 
     try {
       const res = await API.post("/login", {
-        email,
+        email: email.trim(),
         password,
       });
 
@@ -46,7 +67,16 @@ function Login() {
 
       navigate("/dashboard");
     } catch (err) {
-      alert(err.response?.data?.message || "Login failed");
+      toast({
+        title: "Unable to sign in",
+        description:
+          err.response?.data?.message ||
+          "Please check your credentials and try again.",
+        status: "error",
+        duration: 4000,
+        isClosable: true,
+        position: "top",
+      });
     } finally {
       setLoading(false);
     }
@@ -55,181 +85,320 @@ function Login() {
   return (
     <Box
       minH="100vh"
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      bg="linear-gradient(180deg,#050816,#0B1120)"
-      px={6}
+      bg="#070b14"
       position="relative"
       overflow="hidden"
+      color="white"
     >
-      {/* Background Glow */}
       <Box
         position="absolute"
-        w="500px"
-        h="500px"
+        top="-160px"
+        left="-120px"
+        w={{ base: "280px", md: "520px" }}
+        h={{ base: "280px", md: "520px" }}
+        borderRadius="full"
         bg="orange.400"
         opacity={0.08}
-        filter="blur(180px)"
-        top="-120px"
-        left="-120px"
+        filter="blur(140px)"
+        pointerEvents="none"
       />
 
       <Box
         position="absolute"
-        w="400px"
-        h="400px"
-        bg="green.400"
-        opacity={0.05}
-        filter="blur(170px)"
-        bottom="-80px"
-        right="-80px"
+        right="-140px"
+        bottom="-160px"
+        w={{ base: "300px", md: "520px" }}
+        h={{ base: "300px", md: "520px" }}
+        borderRadius="full"
+        bg="blue.500"
+        opacity={0.06}
+        filter="blur(150px)"
+        pointerEvents="none"
       />
 
-      <Box
-        as={motion.div}
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        w="100%"
-        maxW="470px"
+      <Flex
+        minH="100vh"
+        align="center"
+        justify="center"
+        px={{ base: 4, sm: 6, md: 8 }}
+        py={{ base: 6, md: 10 }}
       >
         <Box
-          p={9}
-          borderRadius="30px"
-          bg="rgba(255,255,255,0.05)"
-          border="1px solid rgba(255,255,255,0.08)"
-          backdropFilter="blur(18px)"
-          boxShadow="0 20px 60px rgba(0,0,0,.45)"
+          as={motion.div}
+          initial={{ opacity: 0, y: 18 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          w="100%"
+          maxW="460px"
         >
-          <VStack spacing={6} align="stretch">
-            <Box textAlign="center">
-              <Text fontSize="5xl">₿</Text>
+          <Box
+            p={{ base: 5, sm: 7, md: 8 }}
+            border="1px solid"
+            borderColor="whiteAlpha.100"
+            borderRadius={{ base: "20px", md: "26px" }}
+            bg="rgba(15,23,42,0.78)"
+            backdropFilter="blur(20px)"
+            boxShadow="0 24px 70px rgba(0,0,0,0.36)"
+          >
+            <VStack spacing={{ base: 5, md: 6 }} align="stretch">
+              <Box textAlign="center">
+                <Flex
+                  align="center"
+                  justify="center"
+                  w="54px"
+                  h="54px"
+                  mx="auto"
+                  borderRadius="16px"
+                  bg="rgba(245,158,11,0.10)"
+                  border="1px solid"
+                  borderColor="rgba(245,158,11,0.18)"
+                  color="orange.300"
+                  fontSize="2xl"
+                  fontWeight="800"
+                >
+                  ₿
+                </Flex>
 
-              <Text fontSize="3xl" color="white" fontWeight="bold">
-                BitcoinVault
-              </Text>
+                <Text
+                  mt={5}
+                  fontSize={{ base: "2xl", sm: "3xl" }}
+                  fontWeight="800"
+                  letterSpacing="-0.03em"
+                >
+                  Welcome back
+                </Text>
 
-              <Text color="gray.400" mt={2}>
-                Welcome back.
-              </Text>
+                <Text
+                  mt={2}
+                  fontSize="sm"
+                  color="gray.500"
+                  lineHeight="1.7"
+                >
+                  Sign in to manage your portfolio and investments.
+                </Text>
+              </Box>
 
-              <Text color="gray.500" fontSize="sm">
-                Secure access to your crypto investment portfolio.
-              </Text>
-            </Box>
+              <Divider borderColor="whiteAlpha.100" />
 
-            <Divider borderColor="whiteAlpha.200" />
+              <VStack spacing={4} align="stretch">
+                <Box>
+                  <Text
+                    mb={2}
+                    fontSize="sm"
+                    fontWeight="600"
+                    color="gray.300"
+                  >
+                    Email address
+                  </Text>
 
-            <Input
-              placeholder="Email Address"
-              size="lg"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              color="white"
-              bg="rgba(255,255,255,.04)"
-              border="1px solid rgba(255,255,255,.08)"
-              _placeholder={{ color: "gray.500" }}
-              _focus={{
-                borderColor: "orange.400",
-                boxShadow: "0 0 0 1px orange",
-              }}
-            />
+                  <Input
+                    h="52px"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    type="email"
+                    autoComplete="email"
+                    color="white"
+                    bg="whiteAlpha.50"
+                    borderColor="whiteAlpha.100"
+                    borderRadius="13px"
+                    _placeholder={{
+                      color: "gray.600",
+                    }}
+                    _hover={{
+                      borderColor: "whiteAlpha.200",
+                    }}
+                    _focus={{
+                      borderColor: "orange.400",
+                      boxShadow: "0 0 0 1px rgba(245,158,11,0.6)",
+                    }}
+                  />
+                </Box>
 
-            <InputGroup size="lg">
-              <Input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                color="white"
-                bg="rgba(255,255,255,.04)"
-                border="1px solid rgba(255,255,255,.08)"
-                _placeholder={{ color: "gray.500" }}
-                _focus={{
-                  borderColor: "orange.400",
-                  boxShadow: "0 0 0 1px orange",
-                }}
-              />
+                <Box>
+                  <Text
+                    mb={2}
+                    fontSize="sm"
+                    fontWeight="600"
+                    color="gray.300"
+                  >
+                    Password
+                  </Text>
 
-              <InputRightElement>
-                <IconButton
-                  size="sm"
-                  variant="ghost"
+                  <InputGroup>
+                    <Input
+                      h="52px"
+                      pr="48px"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Enter your password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      color="white"
+                      bg="whiteAlpha.50"
+                      borderColor="whiteAlpha.100"
+                      borderRadius="13px"
+                      _placeholder={{
+                        color: "gray.600",
+                      }}
+                      _hover={{
+                        borderColor: "whiteAlpha.200",
+                      }}
+                      _focus={{
+                        borderColor: "orange.400",
+                        boxShadow: "0 0 0 1px rgba(245,158,11,0.6)",
+                      }}
+                    />
+
+                    <InputRightElement h="52px" w="48px">
+                      <IconButton
+                        aria-label={
+                          showPassword
+                            ? "Hide password"
+                            : "Show password"
+                        }
+                        icon={
+                          showPassword ? <FiEyeOff /> : <FiEye />
+                        }
+                        variant="ghost"
+                        color="gray.500"
+                        size="sm"
+                        borderRadius="10px"
+                        onClick={() =>
+                          setShowPassword(!showPassword)
+                        }
+                        _hover={{
+                          color: "white",
+                          bg: "whiteAlpha.100",
+                        }}
+                      />
+                    </InputRightElement>
+                  </InputGroup>
+                </Box>
+              </VStack>
+
+              <Flex
+                align={{ base: "flex-start", sm: "center" }}
+                justify="space-between"
+                direction={{ base: "column", sm: "row" }}
+                gap={3}
+              >
+                <Checkbox
+                  colorScheme="orange"
                   color="gray.400"
-                  icon={showPassword ? <FiEyeOff /> : <FiEye />}
-                  onClick={() => setShowPassword(!showPassword)}
-                />
-              </InputRightElement>
-            </InputGroup>
+                  size="sm"
+                >
+                  Remember me
+                </Checkbox>
 
-            <HStack justify="space-between">
-              <Checkbox colorScheme="orange" color="gray.300">
-                Remember me
-              </Checkbox>
+                <Text
+                  as={Link}
+                  to="/forgot-password"
+                  fontSize="sm"
+                  fontWeight="600"
+                  color="orange.300"
+                  _hover={{
+                    color: "orange.200",
+                  }}
+                >
+                  Forgot password?
+                </Text>
+              </Flex>
 
-              <Text
-                as={Link}
-                to="/forgot-password"
-                fontSize="sm"
-                color="orange.300"
-                cursor="pointer"
-                fontWeight="bold"
+              <Button
+                h="54px"
+                color="gray.950"
+                bg="orange.400"
+                borderRadius="13px"
+                fontSize="md"
+                fontWeight="700"
+                rightIcon={<FiArrowRight />}
+                isLoading={loading}
+                loadingText="Signing in..."
+                onClick={handleLogin}
                 _hover={{
-                  color: "orange.200",
+                  bg: "orange.300",
+                  transform: "translateY(-1px)",
+                  boxShadow: "0 10px 26px rgba(245,158,11,0.18)",
+                }}
+                _active={{
+                  transform: "translateY(0)",
                 }}
               >
-                Forgot Password?
-              </Text>
-            </HStack>
+                Sign in
+              </Button>
 
-            <Button
-              h="56px"
-              bg="orange.400"
-              color="black"
-              fontWeight="bold"
-              fontSize="lg"
-              _hover={{
-                bg: "orange.300",
-                transform: "translateY(-2px)",
-              }}
-              isLoading={loading}
-              loadingText="Signing In..."
-              onClick={handleLogin}
-            >
-              Login
-            </Button>
-
-            <Box
-              p={5}
-              borderRadius="18px"
-              bg="rgba(255,255,255,.03)"
-              border="1px solid rgba(255,255,255,.06)"
-            >
-              <Text color="green.300" fontWeight="bold" mb={2}>
-                🔒 Secure Login
-              </Text>
-
-              <Text color="gray.400" fontSize="sm" lineHeight="1.8">
-                Your account is protected using encrypted authentication and
-                secure access controls.
-              </Text>
-            </Box>
-
-            <Text textAlign="center" color="gray.400">
-              Don't have an account?{" "}
-              <Text
-                as={Link}
-                to="/register"
-                color="orange.300"
-                fontWeight="bold"
+              <Flex
+                align="center"
+                justify="center"
+                gap={2}
+                color="gray.500"
+                fontSize="xs"
               >
-                Create Account
+                <FiShield />
+                Secure account access
+              </Flex>
+
+              <Box
+                p={4}
+                borderRadius="15px"
+                bg="rgba(34,197,94,0.06)"
+                border="1px solid"
+                borderColor="rgba(34,197,94,0.10)"
+              >
+                <Flex align="flex-start" gap={3}>
+                  <Box
+                    mt={0.5}
+                    color="green.300"
+                    flexShrink={0}
+                  >
+                    <FiCheckCircle />
+                  </Box>
+
+                  <Box>
+                    <Text
+                      fontSize="sm"
+                      fontWeight="600"
+                      color="gray.200"
+                    >
+                      Protected access
+                    </Text>
+
+                    <Text
+                      mt={1}
+                      fontSize="xs"
+                      lineHeight="1.7"
+                      color="gray.500"
+                    >
+                      Your account is protected with secure
+                      authentication and encrypted access controls.
+                    </Text>
+                  </Box>
+                </Flex>
+              </Box>
+
+              <Text
+                textAlign="center"
+                fontSize="sm"
+                color="gray.500"
+              >
+                Don't have an account?{" "}
+                <Text
+                  as={Link}
+                  to="/register"
+                  color="orange.300"
+                  fontWeight="700"
+                  _hover={{
+                    color: "orange.200",
+                  }}
+                >
+                  Create one
+                </Text>
               </Text>
-            </Text>
-          </VStack>
+            </VStack>
+          </Box>
         </Box>
-      </Box>
+      </Flex>
     </Box>
   );
 }

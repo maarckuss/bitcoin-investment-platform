@@ -1,37 +1,66 @@
-import { Box, Text } from "@chakra-ui/react";
+import { Box, Flex, Text } from "@chakra-ui/react";
+import { FiRepeat } from "react-icons/fi";
 import TransactionTable from "../components/TransactionTable";
 
 function Transactions() {
   return (
     <Box
-      p={8}
-      flex={1}
-      minH="100vh"
-      bg="transparent"
+      minH="calc(100vh - 96px)"
+      bg="#0b1220"
+      px={{ base: 4, sm: 5, md: 6, lg: 8 }}
+      py={{ base: 5, md: 7, lg: 8 }}
+      overflowX="hidden"
     >
-      <Box maxW="1200px" mx="auto">
-        <Text
-          fontSize="3xl"
-          fontWeight="bold"
-          color="white"
+      <Box maxW="1280px" mx="auto" w="100%">
+        <Flex
+          align="center"
+          gap={3}
+          mb={{ base: 5, md: 7 }}
         >
-          Transaction History
-        </Text>
+          <Flex
+            align="center"
+            justify="center"
+            w="44px"
+            h="44px"
+            flexShrink={0}
+            borderRadius="13px"
+            bg="rgba(59,130,246,0.10)"
+            color="blue.300"
+          >
+            <FiRepeat size={20} />
+          </Flex>
 
-        <Text
-          fontSize="sm"
-          color="gray.400"
-          mb={6}
-        >
-          All deposits and withdrawals in one place
-        </Text>
+          <Box>
+            <Text
+              fontSize={{ base: "2xl", sm: "3xl", md: "4xl" }}
+              fontWeight="800"
+              color="white"
+              letterSpacing="-0.03em"
+            >
+              Transaction history
+            </Text>
+
+            <Text
+              mt={1}
+              fontSize={{ base: "sm", md: "md" }}
+              color="gray.500"
+            >
+              Review your deposits and withdrawals.
+            </Text>
+          </Box>
+        </Flex>
 
         <Box
-          p={6}
-          borderRadius="20px"
-          bg="rgba(255,255,255,0.04)"
-          border="1px solid rgba(255,255,255,0.08)"
-          boxShadow="0 8px 24px rgba(0,0,0,0.25)"
+          w="100%"
+          minW="0"
+          p={{ base: 3, sm: 4, md: 5, lg: 6 }}
+          border="1px solid"
+          borderColor="whiteAlpha.100"
+          borderRadius={{ base: "16px", md: "20px" }}
+          bg="rgba(255,255,255,0.035)"
+          backdropFilter="blur(12px)"
+          boxShadow="0 10px 30px rgba(0,0,0,0.14)"
+          overflow="hidden"
         >
           <TransactionTable />
         </Box>

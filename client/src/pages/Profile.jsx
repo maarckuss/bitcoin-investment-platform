@@ -1,507 +1,527 @@
 import { useEffect, useState } from "react";
-
 import {
+  Avatar,
+  Badge,
   Box,
   Button,
+  Divider,
+  Flex,
   FormControl,
   FormLabel,
   Input,
-  Text,
-  VStack,
-  HStack,
-  Avatar,
-  Badge,
-  Divider,
   SimpleGrid,
   Stat,
   StatLabel,
   StatNumber,
+  Text,
   useToast,
+  VStack,
 } from "@chakra-ui/react";
-
+import {
+  FiCheckCircle,
+  FiLock,
+  FiSave,
+  FiUser,
+} from "react-icons/fi";
 import API from "../api/axios";
 
-
 function Profile() {
-
   const [user, setUser] = useState({});
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const toast = useToast();
 
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+
+      const res = await API.get("/profile", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUser(res.data);
+      setName(res.data.name || "");
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   useEffect(() => {
     fetchProfile();
   }, []);
 
-
-
-  const fetchProfile = async () => {
-
-    try {
-
-      const token = localStorage.getItem("token");
-
-      const res = await API.get("/profile", {
-        headers:{
-          Authorization:`Bearer ${token}`,
-        },
+  const updateProfile = async () => {
+    if (!name.trim()) {
+      toast({
+        title: "Name required",
+        description: "Please enter your full name.",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
       });
 
-
-      setUser(res.data);
-      setName(res.data.name || "");
-
-
-    } catch(err){
-
-      console.error(err);
-
+      return;
     }
 
-  };
-
-
-
-  const updateProfile = async()=>{
-
-    try{
+    try {
+      setSaving(true);
 
       const token = localStorage.getItem("token");
-
 
       await API.patch(
         "/profile",
         {
-          name,
+          name: name.trim(),
           password,
         },
         {
-          headers:{
-            Authorization:`Bearer ${token}`,
+          headers: {
+            Authorization: `Bearer ${token}`,
           },
-        }
+        },
       );
 
-
       toast({
-        title:"Profile Updated",
-        description:"Your account details have been updated.",
-        status:"success",
-        duration:3000,
-        isClosable:true,
+        title: "Profile updated",
+        description: "Your account details have been updated.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
       });
-
 
       setPassword("");
-      fetchProfile();
-
-
-    }catch(err){
-
+      await fetchProfile();
+    } catch (err) {
       toast({
-        title:"Update Failed",
+        title: "Update failed",
         description:
           err.response?.data?.message ||
-          "Something went wrong",
-        status:"error",
-        duration:3000,
-        isClosable:true,
+          "Something went wrong.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+        position: "top",
       });
-
+    } finally {
+      setSaving(false);
     }
-
   };
-
-
 
   const initials = (user.name || "?")
     .split(" ")
-    .map(n=>n[0])
+    .filter(Boolean)
+    .map((part) => part[0])
     .join("")
-    .slice(0,2)
+    .slice(0, 2)
     .toUpperCase();
 
-
-
   return (
-
     <Box
-      p={8}
-      minH="100vh"
+      minH="calc(100vh - 96px)"
+      bg="#0b1220"
+      px={{ base: 4, sm: 5, md: 6, lg: 8 }}
+      py={{ base: 5, md: 7, lg: 8 }}
+      overflowX="hidden"
     >
+      <Box maxW="1050px" mx="auto" w="100%">
+        <Box mb={{ base: 5, md: 7 }}>
+          <Text
+            fontSize={{ base: "2xl", sm: "3xl", md: "4xl" }}
+            fontWeight="800"
+            color="white"
+            letterSpacing="-0.03em"
+          >
+            Profile
+          </Text>
 
-      <Box
-        maxW="950px"
-        mx="auto"
-      >
-
-
-        {/* PROFILE HEADER */}
+          <Text
+            mt={2}
+            color="gray.500"
+            fontSize={{ base: "sm", md: "md" }}
+          >
+            Manage your account details and security settings.
+          </Text>
+        </Box>
 
         <Box
-          p={8}
-          borderRadius="28px"
+          p={{ base: 5, sm: 6, md: 7 }}
+          mb={{ base: 5, md: 6 }}
+          border="1px solid"
+          borderColor="whiteAlpha.100"
+          borderRadius={{ base: "18px", md: "22px" }}
           bg="linear-gradient(
-            145deg,
-            rgba(255,255,255,0.08),
-            rgba(255,255,255,0.03)
+            135deg,
+            rgba(245,158,11,0.08),
+            rgba(255,255,255,0.025)
           )"
-          border="1px solid rgba(255,255,255,0.12)"
-          boxShadow="0 20px 40px rgba(0,0,0,0.35)"
-          mb={8}
+          backdropFilter="blur(14px)"
+          boxShadow="0 16px 42px rgba(0,0,0,0.18)"
         >
-
-          <HStack spacing={6}>
-
-
+          <Flex
+            direction={{ base: "column", sm: "row" }}
+            align={{ base: "flex-start", sm: "center" }}
+            gap={{ base: 4, sm: 5 }}
+          >
             <Avatar
-              size="2xl"
+              size={{ base: "lg", md: "xl" }}
               name={user.name}
               bg="orange.400"
-              color="black"
-              border="4px solid rgba(251,146,60,0.5)"
+              color="gray.950"
+              fontWeight="800"
+              border="3px solid"
+              borderColor="rgba(245,158,11,0.22)"
             >
               {initials}
             </Avatar>
 
-
-
-            <Box>
-
-
-              <Text
-                fontSize="3xl"
-                fontWeight="bold"
-                color="white"
+            <Box minW="0" flex="1">
+              <Flex
+                align={{ base: "flex-start", sm: "center" }}
+                direction={{ base: "column", sm: "row" }}
+                gap={2}
               >
-                {user.name}
-              </Text>
-
-
-              <Text
-                color="gray.400"
-              >
-                {user.email}
-              </Text>
-
-
-
-              <HStack mt={4}>
-
+                <Text
+                  fontSize={{ base: "xl", md: "2xl" }}
+                  fontWeight="800"
+                  color="white"
+                  noOfLines={1}
+                >
+                  {user.name || "Investor Account"}
+                </Text>
 
                 <Badge
-                  px={3}
-                  py={1}
-                  borderRadius="full"
                   colorScheme={
-                    user.role==="admin"
-                    ? "orange"
-                    : "green"
+                    user.role === "admin" ? "orange" : "blue"
                   }
+                  borderRadius="full"
+                  px={2.5}
+                  fontSize="10px"
+                  textTransform="capitalize"
                 >
                   {user.role || "user"}
                 </Badge>
-
-
-
-                <Badge
-                  px={3}
-                  py={1}
-                  borderRadius="full"
-                  colorScheme={
-                    user.blocked
-                    ? "red"
-                    : "green"
-                  }
-                >
-                  {
-                    user.blocked
-                    ? "Blocked"
-                    : "Active"
-                  }
-                </Badge>
-
-
-              </HStack>
-
-
+              </Flex>
 
               <Text
-                mt={4}
-                fontSize="sm"
+                mt={1}
                 color="gray.500"
+                fontSize="sm"
+                noOfLines={1}
               >
-
-                Member since{" "}
-                {
-                  user.createdAt
-                  ? new Date(user.createdAt)
-                    .toLocaleDateString()
-                  : "--"
-                }
-
+                {user.email || "Account holder"}
               </Text>
 
+              <Flex
+                wrap="wrap"
+                gap={2}
+                mt={4}
+              >
+                <Badge
+                  colorScheme={user.blocked ? "red" : "green"}
+                  variant="subtle"
+                  borderRadius="full"
+                  px={2.5}
+                  fontSize="10px"
+                >
+                  {user.blocked ? "Blocked" : "Active"}
+                </Badge>
 
+                <Badge
+                  variant="subtle"
+                  borderRadius="full"
+                  px={2.5}
+                  fontSize="10px"
+                  colorScheme="gray"
+                >
+                  Member since{" "}
+                  {user.createdAt
+                    ? new Date(
+                        user.createdAt,
+                      ).toLocaleDateString("en-US", {
+                        month: "short",
+                        year: "numeric",
+                      })
+                    : "--"}
+                </Badge>
+              </Flex>
             </Box>
-
-
-          </HStack>
-
-
+          </Flex>
         </Box>
-
-
-
-
-
-        {/* STATS */}
-
 
         <SimpleGrid
-          columns={{
-            base:1,
-            md:2,
-          }}
-          spacing={6}
-          mb={8}
+          columns={{ base: 1, md: 2 }}
+          spacing={{ base: 4, md: 5 }}
+          mb={{ base: 5, md: 6 }}
         >
-
-
           <Stat
-
-            p={6}
-
-            borderRadius="22px"
-
-            bg="rgba(255,255,255,0.04)"
-
-            border="1px solid rgba(255,255,255,0.08)"
-
+            p={{ base: 5, md: 6 }}
+            border="1px solid"
+            borderColor="whiteAlpha.100"
+            borderRadius="18px"
+            bg="rgba(255,255,255,0.035)"
+            backdropFilter="blur(12px)"
           >
+            <Flex align="center" gap={3}>
+              <Flex
+                align="center"
+                justify="center"
+                w="40px"
+                h="40px"
+                borderRadius="12px"
+                bg="rgba(34,197,94,0.10)"
+                color="green.300"
+              >
+                <FiUser />
+              </Flex>
 
-            <StatLabel
-              color="gray.400"
-            >
-              Available Balance
-            </StatLabel>
+              <Box>
+                <StatLabel
+                  color="gray.500"
+                  fontSize="xs"
+                >
+                  Available balance
+                </StatLabel>
 
-
-            <StatNumber
-              color="green.300"
-              fontSize="3xl"
-            >
-              ${user.balance || 0}
-            </StatNumber>
-
-
+                <StatNumber
+                  mt={1}
+                  color="green.300"
+                  fontSize={{ base: "2xl", md: "3xl" }}
+                  fontWeight="800"
+                >
+                  ${user.balance || 0}
+                </StatNumber>
+              </Box>
+            </Flex>
           </Stat>
 
-
-
-
           <Stat
-
-            p={6}
-
-            borderRadius="22px"
-
-            bg="rgba(255,255,255,0.04)"
-
-            border="1px solid rgba(255,255,255,0.08)"
-
+            p={{ base: 5, md: 6 }}
+            border="1px solid"
+            borderColor="whiteAlpha.100"
+            borderRadius="18px"
+            bg="rgba(255,255,255,0.035)"
+            backdropFilter="blur(12px)"
           >
+            <Flex align="center" gap={3}>
+              <Flex
+                align="center"
+                justify="center"
+                w="40px"
+                h="40px"
+                borderRadius="12px"
+                bg="rgba(245,158,11,0.10)"
+                color="orange.300"
+              >
+                <FiCheckCircle />
+              </Flex>
 
-            <StatLabel color="gray.400">
-              Account Type
-            </StatLabel>
+              <Box>
+                <StatLabel
+                  color="gray.500"
+                  fontSize="xs"
+                >
+                  Account type
+                </StatLabel>
 
-
-            <StatNumber
-              color="orange.300"
-              fontSize="2xl"
-              textTransform="capitalize"
-            >
-              {user.role || "user"}
-            </StatNumber>
-
-
+                <StatNumber
+                  mt={1}
+                  color="orange.300"
+                  fontSize={{ base: "xl", md: "2xl" }}
+                  fontWeight="800"
+                  textTransform="capitalize"
+                >
+                  {user.role || "user"}
+                </StatNumber>
+              </Box>
+            </Flex>
           </Stat>
-
-
         </SimpleGrid>
 
-
-
-
-
-        {/* DETAILS */}
-
-
-
         <Box
-
-          p={8}
-
-          borderRadius="24px"
-
-          bg="rgba(255,255,255,0.04)"
-
-          border="1px solid rgba(255,255,255,0.08)"
-
+          p={{ base: 5, sm: 6, md: 7 }}
+          border="1px solid"
+          borderColor="whiteAlpha.100"
+          borderRadius={{ base: "18px", md: "22px" }}
+          bg="rgba(255,255,255,0.035)"
+          backdropFilter="blur(12px)"
+          boxShadow="0 12px 32px rgba(0,0,0,0.14)"
         >
-
-
-          <Text
-            fontSize="2xl"
-            color="white"
-            fontWeight="bold"
-            mb={6}
+          <Flex
+            align="center"
+            gap={3}
+            mb={{ base: 5, md: 6 }}
           >
-            Account Settings
-          </Text>
-
-
-
-          <VStack
-            spacing={5}
-          >
-
-
-            <FormControl>
-
-              <FormLabel color="gray.300">
-                Full Name
-              </FormLabel>
-
-
-              <Input
-
-                value={name}
-
-                onChange={(e)=>setName(e.target.value)}
-
-                color="white"
-
-                bg="rgba(255,255,255,0.05)"
-
-              />
-
-
-            </FormControl>
-
-
-
-
-            <FormControl>
-
-              <FormLabel color="gray.300">
-                Email Address
-              </FormLabel>
-
-
-              <Input
-
-                value={user.email || ""}
-
-                isReadOnly
-
-                color="gray.400"
-
-                bg="rgba(255,255,255,0.05)"
-
-              />
-
-
-            </FormControl>
-
-
-
-
-            <Divider />
-
-
-
-
-            <Text
-              alignSelf="start"
-              color="white"
-              fontWeight="bold"
+            <Flex
+              align="center"
+              justify="center"
+              w="42px"
+              h="42px"
+              borderRadius="13px"
+              bg="rgba(59,130,246,0.10)"
+              color="blue.300"
             >
-              Security
-            </Text>
+              <FiLock size={19} />
+            </Flex>
 
+            <Box>
+              <Text
+                fontSize={{ base: "md", md: "lg" }}
+                fontWeight="700"
+                color="white"
+              >
+                Account settings
+              </Text>
 
+              <Text
+                mt={1}
+                fontSize="xs"
+                color="gray.500"
+              >
+                Update your profile and password.
+              </Text>
+            </Box>
+          </Flex>
 
+          <VStack spacing={5} align="stretch">
             <FormControl>
-
-              <FormLabel color="gray.300">
-                Change Password
+              <FormLabel
+                mb={2}
+                fontSize="sm"
+                fontWeight="600"
+                color="gray.300"
+              >
+                Full name
               </FormLabel>
 
-
               <Input
-
-                type="password"
-
-                value={password}
-
-                onChange={(e)=>setPassword(e.target.value)}
-
+                h="52px"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 color="white"
-
-                bg="rgba(255,255,255,0.05)"
-
+                bg="whiteAlpha.50"
+                borderColor="whiteAlpha.100"
+                borderRadius="12px"
+                _hover={{
+                  borderColor: "whiteAlpha.200",
+                }}
+                _focus={{
+                  borderColor: "orange.400",
+                  boxShadow:
+                    "0 0 0 1px rgba(245,158,11,0.55)",
+                }}
               />
-
-
             </FormControl>
 
+            <FormControl>
+              <FormLabel
+                mb={2}
+                fontSize="sm"
+                fontWeight="600"
+                color="gray.300"
+              >
+                Email address
+              </FormLabel>
 
+              <Input
+                h="52px"
+                value={user.email || ""}
+                isReadOnly
+                color="gray.500"
+                bg="whiteAlpha.30"
+                borderColor="whiteAlpha.80"
+                borderRadius="12px"
+              />
+            </FormControl>
 
+            <Divider borderColor="whiteAlpha.100" />
+
+            <Box>
+              <Text
+                fontSize="sm"
+                fontWeight="700"
+                color="white"
+              >
+                Security
+              </Text>
+
+              <Text
+                mt={1}
+                fontSize="xs"
+                color="gray.500"
+              >
+                Leave the password field empty if you don't want to
+                change it.
+              </Text>
+            </Box>
+
+            <FormControl>
+              <FormLabel
+                mb={2}
+                fontSize="sm"
+                fontWeight="600"
+                color="gray.300"
+              >
+                New password
+              </FormLabel>
+
+              <Input
+                h="52px"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter a new password"
+                color="white"
+                bg="whiteAlpha.50"
+                borderColor="whiteAlpha.100"
+                borderRadius="12px"
+                _placeholder={{
+                  color: "gray.600",
+                }}
+                _hover={{
+                  borderColor: "whiteAlpha.200",
+                }}
+                _focus={{
+                  borderColor: "orange.400",
+                  boxShadow:
+                    "0 0 0 1px rgba(245,158,11,0.55)",
+                }}
+              />
+            </FormControl>
 
             <Button
-
-              w="full"
-
-              size="lg"
-
+              w="100%"
+              h="52px"
+              borderRadius="12px"
               bg="orange.400"
-
-              color="black"
-
-              fontWeight="bold"
-
-              _hover={{
-                bg:"orange.300",
-                transform:"scale(1.02)",
-              }}
-
+              color="gray.950"
+              fontWeight="700"
+              leftIcon={<FiSave />}
+              isLoading={saving}
+              loadingText="Saving changes..."
               onClick={updateProfile}
-
+              _hover={{
+                bg: "orange.300",
+                transform: "translateY(-1px)",
+                boxShadow:
+                  "0 10px 24px rgba(245,158,11,0.14)",
+              }}
+              _active={{
+                transform: "translateY(0)",
+              }}
             >
-
-              Save Changes
-
+              Save changes
             </Button>
-
-
           </VStack>
-
-
         </Box>
-
-
       </Box>
-
-
     </Box>
-
   );
-
 }
-
 
 export default Profile;

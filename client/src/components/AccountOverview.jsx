@@ -1,12 +1,21 @@
 import { useEffect, useState } from "react";
-
-import { Box, Text, VStack, HStack, Badge } from "@chakra-ui/react";
-
-import { FiUser, FiCalendar, FiHash } from "react-icons/fi";
-
+import {
+  Badge,
+  Box,
+  Flex,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
+import {
+  FiCalendar,
+  FiHash,
+  FiUser,
+} from "react-icons/fi";
 import API from "../api/axios";
+
 function AccountOverview() {
   const [user, setUser] = useState(null);
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -26,79 +35,203 @@ function AccountOverview() {
 
     fetchProfile();
   }, []);
+
+  const memberSince = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      })
+    : "Recently";
+
+  const accountId = user?._id?.slice(-8) || "N/A";
+  const accountType = user?.role || "user";
+
   return (
     <Box
-      p={6}
-      borderRadius="20px"
-      bg="rgba(255,255,255,0.04)"
-      border="1px solid rgba(255,255,255,0.08)"
-      color="white"
-      boxShadow="0 8px 24px rgba(0,0,0,0.25)"
+      w="100%"
+      h="100%"
+      p={{ base: 4, sm: 5, md: 6 }}
+      border="1px solid"
+      borderColor="whiteAlpha.100"
+      borderRadius={{ base: "16px", md: "20px" }}
+      bg="rgba(255,255,255,0.035)"
+      backdropFilter="blur(12px)"
+      boxShadow="0 10px 30px rgba(0,0,0,0.14)"
     >
-      <Text fontSize="xl" fontWeight="bold" mb={5}>
-        Account Overview
-      </Text>
+      <Flex
+        align="center"
+        gap={3}
+        mb={{ base: 5, md: 6 }}
+      >
+        <Flex
+          align="center"
+          justify="center"
+          w="42px"
+          h="42px"
+          flexShrink={0}
+          borderRadius="14px"
+          bg="rgba(59,130,246,0.12)"
+          color="blue.300"
+        >
+          <FiUser size={19} />
+        </Flex>
 
-      <VStack spacing={5} align="stretch">
-        <HStack spacing={4}>
-          <Box
-            p={3}
-            borderRadius="full"
-            bg="rgba(59,130,246,0.15)"
-            color="blue.400"
+        <Box minW="0">
+          <Text
+            fontSize={{ base: "md", md: "lg" }}
+            fontWeight="700"
+            color="white"
           >
-            <FiUser />
-          </Box>
-
-          <Box>
-            <Text fontWeight="bold">{user?.name || "Investor Account"}</Text>
-
-            <Text fontSize="sm" color="gray.400">
-              {user?.email || "Account holder"}
-            </Text>
-          </Box>
-        </HStack>
-
-        <HStack justify="space-between">
-          <HStack>
-            <FiCalendar />
-
-            <Text color="gray.300">Member Since</Text>
-          </HStack>
-
-          <Text>
-            {user?.createdAt
-              ? new Date(user.createdAt).toLocaleDateString("en-US", {
-                  month: "long",
-                  year: "numeric",
-                })
-              : "Recently"}
+            Account Overview
           </Text>
-        </HStack>
 
-        <HStack justify="space-between">
-          <HStack>
-            <FiHash />
+          <Text
+            mt={0.5}
+            fontSize="xs"
+            color="gray.500"
+          >
+            Your account information
+          </Text>
+        </Box>
+      </Flex>
 
-            <Text color="gray.300">Account ID</Text>
-          </HStack>
+      <Box
+        p={{ base: 4, md: 5 }}
+        mb={4}
+        borderRadius="16px"
+        bg="whiteAlpha.40"
+        border="1px solid"
+        borderColor="whiteAlpha.80"
+      >
+        <Text
+          fontSize="md"
+          fontWeight="700"
+          color="white"
+          noOfLines={1}
+        >
+          {user?.name || "Investor Account"}
+        </Text>
 
-          <Text>{user?._id?.slice(-8) || "N/A"}</Text>
-        </HStack>
+        <Text
+          mt={1}
+          fontSize="sm"
+          color="gray.500"
+          noOfLines={1}
+        >
+          {user?.email || "Account holder"}
+        </Text>
+      </Box>
 
-        <HStack justify="space-between">
-          <Text color="gray.300">Status</Text>
+      <VStack spacing={0} align="stretch">
+        <Flex
+          align="center"
+          justify="space-between"
+          gap={4}
+          py={4}
+          borderBottom="1px solid"
+          borderColor="whiteAlpha.80"
+        >
+          <Flex
+            align="center"
+            gap={3}
+            minW="0"
+            color="gray.500"
+          >
+            <FiCalendar size={16} />
+            <Text fontSize="sm">
+              Member Since
+            </Text>
+          </Flex>
 
-          <Badge colorScheme="green">ACTIVE</Badge>
-        </HStack>
+          <Text
+            flexShrink={0}
+            fontSize="sm"
+            color="gray.200"
+            textAlign="right"
+          >
+            {memberSince}
+          </Text>
+        </Flex>
 
-        <HStack justify="space-between">
-          <Text color="gray.300">Account Type</Text>
+        <Flex
+          align="center"
+          justify="space-between"
+          gap={4}
+          py={4}
+          borderBottom="1px solid"
+          borderColor="whiteAlpha.80"
+        >
+          <Flex
+            align="center"
+            gap={3}
+            color="gray.500"
+          >
+            <FiHash size={16} />
+            <Text fontSize="sm">
+              Account ID
+            </Text>
+          </Flex>
 
-          <Badge colorScheme={user?.role === "admin" ? "purple" : "blue"}>
-            {user?.role || "user"}
+          <Text
+            flexShrink={0}
+            fontSize="sm"
+            fontFamily="mono"
+            color="gray.200"
+          >
+            #{accountId}
+          </Text>
+        </Flex>
+
+        <Flex
+          align="center"
+          justify="space-between"
+          gap={4}
+          py={4}
+          borderBottom="1px solid"
+          borderColor="whiteAlpha.80"
+        >
+          <Text
+            fontSize="sm"
+            color="gray.500"
+          >
+            Status
+          </Text>
+
+          <Badge
+            colorScheme="green"
+            variant="subtle"
+            borderRadius="full"
+            px={2.5}
+            fontSize="10px"
+          >
+            ACTIVE
           </Badge>
-        </HStack>
+        </Flex>
+
+        <Flex
+          align="center"
+          justify="space-between"
+          gap={4}
+          py={4}
+        >
+          <Text
+            fontSize="sm"
+            color="gray.500"
+          >
+            Account Type
+          </Text>
+
+          <Badge
+            colorScheme={accountType === "admin" ? "purple" : "blue"}
+            variant="subtle"
+            borderRadius="full"
+            px={2.5}
+            fontSize="10px"
+            textTransform="capitalize"
+          >
+            {accountType}
+          </Badge>
+        </Flex>
       </VStack>
     </Box>
   );

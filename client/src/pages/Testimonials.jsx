@@ -1,560 +1,644 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-Box,
-Text,
-SimpleGrid,
-Avatar,
-VStack,
-HStack,
-Badge,
-Flex,
-Divider,
-Spinner,
-Center,
+  Avatar,
+  Badge,
+  Box,
+  Center,
+  Divider,
+  Flex,
+  SimpleGrid,
+  Spinner,
+  Text,
+  useToast,
+  VStack,
 } from "@chakra-ui/react";
 import { motion } from "framer-motion";
 import {
-FiStar,
-FiShield,
-FiTrendingUp,
-FiUsers,
+  FiMessageSquare,
+  FiShield,
+  FiStar,
+  FiTrendingUp,
+  FiUsers,
 } from "react-icons/fi";
 import API from "../api/axios";
 
 function Testimonials() {
-const [testimonials, setTestimonials] = useState([]);
-const [loading, setLoading] = useState(true);
+  const [testimonials, setTestimonials] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-useEffect(() => {
-fetchTestimonials();
-}, []);
+  const toast = useToast();
 
-const fetchTestimonials = async () => {
-try {
-const res = await API.get("/testimonials");
-setTestimonials(res.data);
-} catch (err) {
-console.log(err);
-} finally {
-setLoading(false);
-}
-};
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await API.get("/testimonials");
+        setTestimonials(res.data || []);
+      } catch (err) {
+        console.error(err);
 
-const featuredTestimonials = testimonials.filter(
-(item) => item.featured
-);
+        toast({
+          title: "Unable to load testimonials",
+          description:
+            err.response?.data?.message ||
+            "Please try again later.",
+          status: "error",
+          duration: 4000,
+          isClosable: true,
+          position: "top",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-const totalRatings = testimonials.reduce(
-(sum, item) => sum + Number(item.rating || 0),
-0
-);
+    fetchTestimonials();
+  }, [toast]);
 
-const averageRating =
-testimonials.length > 0
-? (totalRatings / testimonials.length).toFixed(1)
-: "5.0";
+  const featuredTestimonials = useMemo(
+    () => testimonials.filter((item) => item.featured),
+    [testimonials],
+  );
 
-return (
-<Box
-minH="100vh"
-p={{ base: 5, md: 8 }}
-position="relative"
-overflow="hidden"
->
-{/* Background Glow */} <Box
-     position="absolute"
-     w="450px"
-     h="450px"
-     bg="orange.400"
-     opacity={0.05}
-     filter="blur(160px)"
-     top="-150px"
-     right="-120px"
-     pointerEvents="none"
-   />
+  const averageRating = useMemo(() => {
+    if (!testimonials.length) return "0.0";
 
-```
-  <Box
-    position="absolute"
-    w="400px"
-    h="400px"
-    bg="blue.500"
-    opacity={0.04}
-    filter="blur(160px)"
-    bottom="-150px"
-    left="-120px"
-    pointerEvents="none"
-  />
+    const total = testimonials.reduce(
+      (sum, item) => sum + Number(item.rating || 0),
+      0,
+    );
 
-  <Box maxW="1200px" mx="auto" position="relative">
-    {/* HERO */}
+    return (total / testimonials.length).toFixed(1);
+  }, [testimonials]);
+
+  return (
     <Box
-      p={{ base: 7, md: 10 }}
-      borderRadius="30px"
-      mb={8}
-      bg="linear-gradient(135deg, rgba(245,158,11,.12), rgba(255,255,255,.04))"
-      border="1px solid rgba(255,255,255,.08)"
-      backdropFilter="blur(18px)"
-      boxShadow="0 20px 60px rgba(0,0,0,.25)"
+      minH="calc(100vh - 96px)"
+      bg="#0b1220"
+      px={{ base: 4, sm: 5, md: 6, lg: 8 }}
+      py={{ base: 5, md: 7, lg: 8 }}
+      overflowX="hidden"
+      position="relative"
     >
-      <Flex
-        direction={{ base: "column", md: "row" }}
-        justify="space-between"
-        align={{ base: "start", md: "center" }}
-        gap={8}
+      <Box
+        position="absolute"
+        top="-140px"
+        right="-120px"
+        w={{ base: "280px", md: "480px" }}
+        h={{ base: "280px", md: "480px" }}
+        borderRadius="full"
+        bg="orange.400"
+        opacity={0.05}
+        filter="blur(150px)"
+        pointerEvents="none"
+      />
+
+      <Box
+        position="absolute"
+        bottom="-160px"
+        left="-130px"
+        w={{ base: "300px", md: "500px" }}
+        h={{ base: "300px", md: "500px" }}
+        borderRadius="full"
+        bg="blue.500"
+        opacity={0.04}
+        filter="blur(150px)"
+        pointerEvents="none"
+      />
+
+      <Box
+        maxW="1280px"
+        mx="auto"
+        w="100%"
+        position="relative"
       >
-        <Box maxW="680px">
-          <HStack mb={4}>
-            <Box
-              p={3}
-              borderRadius="14px"
-              bg="rgba(245,158,11,.12)"
-              color="orange.300"
-            >
-              <FiUsers size={22} />
+        <Box
+          p={{ base: 5, sm: 6, md: 8, lg: 10 }}
+          mb={{ base: 5, md: 7 }}
+          border="1px solid"
+          borderColor="whiteAlpha.100"
+          borderRadius={{ base: "18px", md: "24px" }}
+          bg="linear-gradient(
+            135deg,
+            rgba(245,158,11,0.10),
+            rgba(255,255,255,0.025)
+          )"
+          backdropFilter="blur(18px)"
+          boxShadow="0 18px 50px rgba(0,0,0,0.18)"
+        >
+          <Flex
+            direction={{ base: "column", lg: "row" }}
+            align={{ base: "stretch", lg: "center" }}
+            justify="space-between"
+            gap={{ base: 5, lg: 8 }}
+          >
+            <Box maxW="720px">
+              <Flex
+                align="center"
+                gap={3}
+                mb={4}
+                flexWrap="wrap"
+              >
+                <Flex
+                  align="center"
+                  justify="center"
+                  w="42px"
+                  h="42px"
+                  borderRadius="13px"
+                  bg="rgba(245,158,11,0.10)"
+                  color="orange.300"
+                >
+                  <FiUsers size={19} />
+                </Flex>
+
+                <Badge
+                  colorScheme="orange"
+                  variant="subtle"
+                  borderRadius="full"
+                  px={3}
+                  py={1}
+                  fontSize="10px"
+                  textTransform="uppercase"
+                  letterSpacing="0.08em"
+                >
+                  Investor community
+                </Badge>
+              </Flex>
+
+              <Text
+                fontSize={{ base: "2xl", sm: "3xl", md: "4xl", lg: "5xl" }}
+                fontWeight="800"
+                color="white"
+                lineHeight="1.05"
+                letterSpacing="-0.04em"
+              >
+                What our investors say
+              </Text>
+
+              <Text
+                mt={4}
+                color="gray.500"
+                fontSize={{ base: "sm", md: "md", lg: "lg" }}
+                lineHeight="1.8"
+              >
+                Explore experiences shared by members of the
+                BitcoinVault community.
+              </Text>
             </Box>
 
-            <Badge
-              colorScheme="orange"
-              px={3}
-              py={1}
-              borderRadius="full"
+            <Box
+              flexShrink={0}
+              w="100%"
+              maxW={{ base: "none", lg: "240px" }}
+              p={{ base: 4, md: 5 }}
+              borderRadius="18px"
+              bg="whiteAlpha.40"
+              border="1px solid"
+              borderColor="whiteAlpha.80"
+              textAlign="center"
             >
-              Investor Community
-            </Badge>
-          </HStack>
-
-          <Text
-            fontSize={{ base: "3xl", md: "5xl" }}
-            fontWeight="extrabold"
-            color="white"
-            lineHeight="1.1"
-          >
-            What Our Investors Say
-          </Text>
-
-          <Text
-            color="gray.400"
-            fontSize={{ base: "md", md: "lg" }}
-            mt={4}
-            lineHeight="1.8"
-          >
-            Discover what members of the BitcoinVault community have to
-            say about their experience with our platform.
-          </Text>
-        </Box>
-
-        {/* Rating Summary */}
-        <Box
-          minW={{ base: "100%", md: "220px" }}
-          p={6}
-          borderRadius="22px"
-          bg="rgba(255,255,255,.04)"
-          border="1px solid rgba(255,255,255,.07)"
-          textAlign="center"
-        >
-          <Text color="gray.400" fontSize="sm" mb={2}>
-            Community Rating
-          </Text>
-
-          <Text
-            color="white"
-            fontSize="4xl"
-            fontWeight="extrabold"
-          >
-            {averageRating}
-          </Text>
-
-          <HStack justify="center" color="orange.300" mt={1}>
-            {[1, 2, 3, 4, 5].map((star) => (
-              <FiStar key={star} fill="currentColor" size={16} />
-            ))}
-          </HStack>
-
-          <Text color="gray.500" fontSize="sm" mt={2}>
-            Based on {testimonials.length}{" "}
-            {testimonials.length === 1 ? "review" : "reviews"}
-          </Text>
-        </Box>
-      </Flex>
-    </Box>
-
-    {/* TRUST STATS */}
-    <SimpleGrid
-      columns={{ base: 1, md: 3 }}
-      spacing={5}
-      mb={10}
-    >
-      <Box
-        p={5}
-        borderRadius="20px"
-        bg="rgba(255,255,255,.04)"
-        border="1px solid rgba(255,255,255,.07)"
-      >
-        <HStack>
-          <Box
-            p={3}
-            borderRadius="12px"
-            bg="rgba(59,130,246,.12)"
-            color="blue.300"
-          >
-            <FiUsers />
-          </Box>
-
-          <Box>
-            <Text color="gray.400" fontSize="sm">
-              Investor Reviews
-            </Text>
-
-            <Text color="white" fontSize="2xl" fontWeight="bold">
-              {testimonials.length}
-            </Text>
-          </Box>
-        </HStack>
-      </Box>
-
-      <Box
-        p={5}
-        borderRadius="20px"
-        bg="rgba(255,255,255,.04)"
-        border="1px solid rgba(255,255,255,.07)"
-      >
-        <HStack>
-          <Box
-            p={3}
-            borderRadius="12px"
-            bg="rgba(34,197,94,.12)"
-            color="green.300"
-          >
-            <FiShield />
-          </Box>
-
-          <Box>
-            <Text color="gray.400" fontSize="sm">
-              Featured Investors
-            </Text>
-
-            <Text color="white" fontSize="2xl" fontWeight="bold">
-              {featuredTestimonials.length}
-            </Text>
-          </Box>
-        </HStack>
-      </Box>
-
-      <Box
-        p={5}
-        borderRadius="20px"
-        bg="rgba(245,158,11,.06)"
-        border="1px solid rgba(245,158,11,.12)"
-      >
-        <HStack>
-          <Box
-            p={3}
-            borderRadius="12px"
-            bg="rgba(245,158,11,.12)"
-            color="orange.300"
-          >
-            <FiTrendingUp />
-          </Box>
-
-          <Box>
-            <Text color="gray.400" fontSize="sm">
-              Average Rating
-            </Text>
-
-            <Text color="white" fontSize="2xl" fontWeight="bold">
-              {averageRating}/5
-            </Text>
-          </Box>
-        </HStack>
-      </Box>
-    </SimpleGrid>
-
-    {/* SECTION TITLE */}
-    <Flex
-      justify="space-between"
-      align="center"
-      mb={6}
-      wrap="wrap"
-      gap={3}
-    >
-      <Box>
-        <Text
-          color="white"
-          fontSize="2xl"
-          fontWeight="bold"
-        >
-          Investor Experiences
-        </Text>
-
-        <Text color="gray.500" fontSize="sm" mt={1}>
-          Real experiences from members of our community.
-        </Text>
-      </Box>
-
-      <Badge
-        colorScheme="green"
-        px={3}
-        py={1.5}
-        borderRadius="full"
-      >
-        ● Community Feedback
-      </Badge>
-    </Flex>
-
-    <Divider
-      borderColor="whiteAlpha.100"
-      mb={8}
-    />
-
-    {/* LOADING */}
-    {loading && (
-      <Center py={20}>
-        <VStack spacing={4}>
-          <Spinner
-            size="xl"
-            color="orange.300"
-            thickness="4px"
-          />
-
-          <Text color="gray.400">
-            Loading investor experiences...
-          </Text>
-        </VStack>
-      </Center>
-    )}
-
-    {/* EMPTY STATE */}
-    {!loading && testimonials.length === 0 && (
-      <Box
-        p={10}
-        textAlign="center"
-        borderRadius="24px"
-        bg="rgba(255,255,255,.04)"
-        border="1px solid rgba(255,255,255,.08)"
-      >
-        <Text color="white" fontSize="xl" fontWeight="bold">
-          No testimonials yet
-        </Text>
-
-        <Text color="gray.500" mt={2}>
-          Investor experiences will appear here once they are added.
-        </Text>
-      </Box>
-    )}
-
-    {/* TESTIMONIAL CARDS */}
-    {!loading && testimonials.length > 0 && (
-      <SimpleGrid
-        columns={{
-          base: 1,
-          md: 2,
-          lg: 3,
-        }}
-        spacing={6}
-      >
-        {testimonials.map((item, index) => (
-          <Box
-            key={item._id}
-            as={motion.div}
-            initial={{
-              opacity: 0,
-              y: 25,
-            }}
-            animate={{
-              opacity: 1,
-              y: 0,
-            }}
-            transition={{
-              duration: 0.45,
-              delay: index * 0.06,
-            }}
-            whileHover={{
-              y: -7,
-            }}
-            p={7}
-            borderRadius="26px"
-            bg="rgba(255,255,255,.045)"
-            border={
-              item.featured
-                ? "1px solid rgba(245,158,11,.25)"
-                : "1px solid rgba(255,255,255,.08)"
-            }
-            backdropFilter="blur(16px)"
-            boxShadow="0 18px 45px rgba(0,0,0,.22)"
-            position="relative"
-            overflow="hidden"
-          >
-            {/* Featured Glow */}
-            {item.featured && (
-              <Box
-                position="absolute"
-                top="-60px"
-                right="-60px"
-                w="140px"
-                h="140px"
-                borderRadius="full"
-                bg="orange.400"
-                opacity={0.07}
-                filter="blur(35px)"
-              />
-            )}
-
-            <VStack
-              align="stretch"
-              spacing={5}
-              position="relative"
-            >
-              <Flex
-                justify="space-between"
-                align="start"
+              <Text
+                fontSize="xs"
+                fontWeight="600"
+                textTransform="uppercase"
+                letterSpacing="0.08em"
+                color="gray.500"
               >
-                <HStack spacing={3}>
-                  <Avatar
-                    name={item.name}
-                    src={item.image}
-                    size="md"
-                    bg="orange.400"
-                    color="black"
+                Community rating
+              </Text>
+
+              <Text
+                mt={2}
+                fontSize={{ base: "3xl", md: "4xl" }}
+                fontWeight="800"
+                color="white"
+              >
+                {averageRating}
+              </Text>
+
+              <Flex
+                justify="center"
+                gap={1}
+                mt={1}
+                color="orange.300"
+              >
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <FiStar
+                    key={index}
+                    size={15}
+                    fill="currentColor"
                   />
+                ))}
+              </Flex>
+
+              <Text
+                mt={2}
+                fontSize="xs"
+                color="gray.600"
+              >
+                Based on {testimonials.length}{" "}
+                {testimonials.length === 1 ? "review" : "reviews"}
+              </Text>
+            </Box>
+          </Flex>
+        </Box>
+
+        <SimpleGrid
+          columns={{ base: 1, md: 3 }}
+          spacing={{ base: 3, md: 4 }}
+          mb={{ base: 7, md: 9 }}
+        >
+          {[
+            {
+              label: "Investor reviews",
+              value: testimonials.length,
+              icon: FiUsers,
+              color: "blue.300",
+              bg: "rgba(59,130,246,0.10)",
+            },
+            {
+              label: "Featured investors",
+              value: featuredTestimonials.length,
+              icon: FiShield,
+              color: "green.300",
+              bg: "rgba(34,197,94,0.10)",
+            },
+            {
+              label: "Average rating",
+              value: `${averageRating}/5`,
+              icon: FiTrendingUp,
+              color: "orange.300",
+              bg: "rgba(245,158,11,0.10)",
+            },
+          ].map((stat) => {
+            const Icon = stat.icon;
+
+            return (
+              <Box
+                key={stat.label}
+                p={{ base: 4, md: 5 }}
+                border="1px solid"
+                borderColor="whiteAlpha.100"
+                borderRadius={{ base: "15px", md: "17px" }}
+                bg="rgba(255,255,255,0.035)"
+                backdropFilter="blur(12px)"
+              >
+                <Flex align="center" gap={3}>
+                  <Flex
+                    align="center"
+                    justify="center"
+                    w="40px"
+                    h="40px"
+                    flexShrink={0}
+                    borderRadius="12px"
+                    bg={stat.bg}
+                    color={stat.color}
+                  >
+                    <Icon size={18} />
+                  </Flex>
 
                   <Box>
                     <Text
-                      color="white"
-                      fontWeight="bold"
-                      fontSize="md"
+                      fontSize="xs"
+                      color="gray.600"
                     >
-                      {item.name}
+                      {stat.label}
                     </Text>
 
                     <Text
-                      color="gray.500"
-                      fontSize="sm"
+                      mt={1}
+                      fontSize={{ base: "xl", md: "2xl" }}
+                      fontWeight="800"
+                      color="white"
                     >
-                      {item.country}
+                      {stat.value}
                     </Text>
                   </Box>
-                </HStack>
+                </Flex>
+              </Box>
+            );
+          })}
+        </SimpleGrid>
 
-                {item.featured && (
-                  <Badge
-                    colorScheme="orange"
-                    borderRadius="full"
-                    px={2.5}
-                    py={1}
-                    fontSize="xs"
+        <Flex
+          align={{ base: "flex-start", sm: "center" }}
+          justify="space-between"
+          direction={{ base: "column", sm: "row" }}
+          gap={3}
+          mb={4}
+        >
+          <Box>
+            <Text
+              fontSize={{ base: "lg", md: "xl" }}
+              fontWeight="700"
+              color="white"
+            >
+              Investor experiences
+            </Text>
+
+            <Text
+              mt={1}
+              fontSize="sm"
+              color="gray.600"
+            >
+              Experiences shared by members of the community.
+            </Text>
+          </Box>
+
+          <Badge
+            colorScheme="green"
+            variant="subtle"
+            borderRadius="full"
+            px={3}
+            py={1.5}
+            fontSize="10px"
+          >
+            Community feedback
+          </Badge>
+        </Flex>
+
+        <Divider
+          mb={{ base: 5, md: 7 }}
+          borderColor="whiteAlpha.100"
+        />
+
+        {loading && (
+          <Center py={16}>
+            <VStack spacing={4}>
+              <Spinner
+                size="lg"
+                thickness="3px"
+                color="orange.300"
+                emptyColor="whiteAlpha.200"
+              />
+
+              <Text
+                color="gray.500"
+                fontSize="sm"
+              >
+                Loading investor experiences...
+              </Text>
+            </VStack>
+          </Center>
+        )}
+
+        {!loading && testimonials.length === 0 && (
+          <Box
+            p={{ base: 7, md: 10 }}
+            textAlign="center"
+            border="1px solid"
+            borderColor="whiteAlpha.100"
+            borderRadius={{ base: "18px", md: "22px" }}
+            bg="rgba(255,255,255,0.035)"
+          >
+            <Flex
+              align="center"
+              justify="center"
+              w="54px"
+              h="54px"
+              mx="auto"
+              borderRadius="16px"
+              bg="whiteAlpha.100"
+              color="gray.400"
+            >
+              <FiMessageSquare size={22} />
+            </Flex>
+
+            <Text
+              mt={5}
+              fontSize="lg"
+              fontWeight="700"
+              color="white"
+            >
+              No testimonials yet
+            </Text>
+
+            <Text
+              mt={2}
+              maxW="450px"
+              mx="auto"
+              fontSize="sm"
+              color="gray.600"
+              lineHeight="1.7"
+            >
+              Investor experiences will appear here once testimonials
+              are added.
+            </Text>
+          </Box>
+        )}
+
+        {!loading && testimonials.length > 0 && (
+          <>
+            <SimpleGrid
+              columns={{ base: 1, md: 2, xl: 3 }}
+              spacing={{ base: 4, md: 5 }}
+            >
+              {testimonials.map((item, index) => (
+                <motion.div
+                  key={item._id}
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    duration: 0.35,
+                    delay: index * 0.04,
+                  }}
+                  whileHover={{ y: -3 }}
+                >
+                  <Box
+                    h="100%"
+                    p={{ base: 4.5, md: 5 }}
+                    border="1px solid"
+                    borderColor={
+                      item.featured
+                        ? "rgba(245,158,11,0.18)"
+                        : "whiteAlpha.100"
+                    }
+                    borderRadius={{ base: "16px", md: "18px" }}
+                    bg={
+                      item.featured
+                        ? "rgba(245,158,11,0.045)"
+                        : "rgba(255,255,255,0.035)"
+                    }
+                    backdropFilter="blur(12px)"
+                    boxShadow="0 12px 32px rgba(0,0,0,0.15)"
                   >
-                    Featured
-                  </Badge>
-                )}
+                    <VStack
+                      align="stretch"
+                      spacing={4}
+                    >
+                      <Flex
+                        justify="space-between"
+                        align="flex-start"
+                        gap={3}
+                      >
+                        <Flex
+                          align="center"
+                          gap={3}
+                          minW="0"
+                        >
+                          <Avatar
+                            name={item.name}
+                            src={item.image}
+                            size="sm"
+                            bg="orange.400"
+                            color="gray.950"
+                            flexShrink={0}
+                          />
+
+                          <Box minW="0">
+                            <Text
+                              fontSize="sm"
+                              fontWeight="700"
+                              color="white"
+                              noOfLines={1}
+                            >
+                              {item.name}
+                            </Text>
+
+                            <Text
+                              mt={0.5}
+                              fontSize="xs"
+                              color="gray.600"
+                              noOfLines={1}
+                            >
+                              {item.country}
+                            </Text>
+                          </Box>
+                        </Flex>
+
+                        {item.featured && (
+                          <Badge
+                            colorScheme="orange"
+                            variant="subtle"
+                            borderRadius="full"
+                            px={2.5}
+                            py={1}
+                            fontSize="9px"
+                            flexShrink={0}
+                          >
+                            Featured
+                          </Badge>
+                        )}
+                      </Flex>
+
+                      <Flex
+                        align="center"
+                        gap={1}
+                      >
+                        {Array.from({ length: 5 }).map((_, index) => {
+                          const filled =
+                            index < Number(item.rating || 0);
+
+                          return (
+                            <FiStar
+                              key={index}
+                              size={14}
+                              color={
+                                filled
+                                  ? "#f59e0b"
+                                  : "#475569"
+                              }
+                              fill={
+                                filled
+                                  ? "#f59e0b"
+                                  : "transparent"
+                              }
+                            />
+                          );
+                        })}
+
+                        <Text
+                          ml={1}
+                          fontSize="xs"
+                          color="gray.600"
+                        >
+                          {item.rating || 0}/5
+                        </Text>
+                      </Flex>
+
+                      <Box>
+                        <Text
+                          color="orange.300"
+                          fontSize="3xl"
+                          fontWeight="800"
+                          lineHeight="0.8"
+                        >
+                          “
+                        </Text>
+
+                        <Text
+                          mt={2}
+                          color="gray.400"
+                          fontSize="sm"
+                          lineHeight="1.8"
+                        >
+                          {item.message}
+                        </Text>
+                      </Box>
+
+                      <Divider borderColor="whiteAlpha.100" />
+
+                      <Flex
+                        align="center"
+                        gap={2}
+                        color="green.300"
+                      >
+                        <FiShield size={14} />
+
+                        <Text
+                          fontSize="xs"
+                          color="gray.600"
+                        >
+                          Community feedback
+                        </Text>
+                      </Flex>
+                    </VStack>
+                  </Box>
+                </motion.div>
+              ))}
+            </SimpleGrid>
+
+            <Box
+              mt={{ base: 8, md: 10 }}
+              p={{ base: 5, md: 6 }}
+              border="1px solid"
+              borderColor="whiteAlpha.80"
+              borderRadius={{ base: "16px", md: "18px" }}
+              bg="rgba(255,255,255,0.025)"
+              textAlign="center"
+            >
+              <Flex
+                align="center"
+                justify="center"
+                gap={2}
+                color="green.300"
+              >
+                <FiShield size={16} />
+
+                <Text
+                  fontSize="sm"
+                  fontWeight="600"
+                >
+                  Powered by our investor community
+                </Text>
               </Flex>
 
-              {/* Stars */}
-              <HStack spacing={1}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <FiStar
-                    key={star}
-                    size={17}
-                    color={
-                      star <= Number(item.rating)
-                        ? "#f59e0b"
-                        : "#4b5563"
-                    }
-                    fill={
-                      star <= Number(item.rating)
-                        ? "#f59e0b"
-                        : "transparent"
-                    }
-                  />
-                ))}
-
-                <Text
-                  color="gray.500"
-                  fontSize="xs"
-                  ml={2}
-                >
-                  {item.rating}/5
-                </Text>
-              </HStack>
-
-              {/* Quote */}
-              <Box>
-                <Text
-                  color="orange.300"
-                  fontSize="4xl"
-                  lineHeight="1"
-                  fontWeight="bold"
-                  mb={2}
-                >
-                  "
-                </Text>
-
-                <Text
-                  color="gray.300"
-                  lineHeight="1.9"
-                  fontSize="sm"
-                >
-                  {item.message}
-                </Text>
-              </Box>
-
-              <Divider borderColor="whiteAlpha.100" />
-
-              <HStack
-                color="green.300"
+              <Text
+                mt={2}
+                maxW="650px"
+                mx="auto"
+                color="gray.600"
                 fontSize="xs"
-                fontWeight="medium"
+                lineHeight="1.7"
               >
-                <FiShield />
-
-                <Text>
-                  Verified community feedback
-                </Text>
-              </HStack>
-            </VStack>
-          </Box>
-        ))}
-      </SimpleGrid>
-    )}
-
-    {/* FOOTER TRUST MESSAGE */}
-    {!loading && testimonials.length > 0 && (
-      <Box
-        mt={12}
-        p={7}
-        textAlign="center"
-        borderRadius="24px"
-        bg="rgba(255,255,255,.03)"
-        border="1px solid rgba(255,255,255,.07)"
-      >
-        <HStack justify="center" mb={3}>
-          <FiShield color="#86efac" />
-          <Text
-            color="green.300"
-            fontWeight="bold"
-          >
-            Built around a trusted investor community
-          </Text>
-        </HStack>
-
-        <Text
-          color="gray.500"
-          fontSize="sm"
-          maxW="650px"
-          mx="auto"
-          lineHeight="1.8"
-        >
-          Explore experiences shared by members of the BitcoinVault
-          community. Testimonials are displayed through the platform's
-          testimonial system.
-        </Text>
+                Explore experiences shared through the platform's
+                testimonial system.
+              </Text>
+            </Box>
+          </>
+        )}
       </Box>
-    )}
-  </Box>
-</Box>
-
-
-);
+    </Box>
+  );
 }
 
 export default Testimonials;

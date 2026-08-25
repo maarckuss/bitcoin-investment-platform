@@ -26,24 +26,9 @@ const Notification = require("./models/Notification");
 const Testimonial = require("./models/Testimonial");
 
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
-
-transporter.verify((error, success) => {
-  if (error) {
-    console.log("Email Error:", error);
-  } else {
-    console.log("Email server ready ✅");
-  }
-});
-
+const resend = new Resend(process.env.RESEND_API_KEY);
 const app = express();
 
 const User = require("./models/User");
@@ -238,10 +223,48 @@ app.post("/api/register", async (req, res) => {
       role: "user",
     });
 
-    // Save to MongoDB
     await newUser.save();
 
     const { password: _, ...safeUser } = newUser.toObject();
+
+    try {
+      console.log("Sending welcome email to:", email);
+
+      const { data, error } = await resend.emails.send({
+        from: "BitcoinVault <onboarding@resend.dev>",
+        to: email,
+        subject: "Welcome to BitcoinVault",
+        html: `
+          <div style="font-family:Arial,sans-serif;background:#0b1220;padding:40px 20px;color:#fff">
+            <div style="max-width:600px;margin:auto;background:#111827;padding:32px;border-radius:16px">
+              <h1 style="color:#f59e0b">Welcome to BitcoinVault</h1>
+
+              <p>Hello ${name},</p>
+
+              <p>Your account has been successfully created.</p>
+
+              <p>You can now log in and access your investment dashboard.</p>
+
+              <p style="margin-top:30px">
+                Thank you for joining BitcoinVault.
+              </p>
+
+              <p style="color:#9ca3af;margin-top:30px">
+                BitcoinVault Team
+              </p>
+            </div>
+          </div>
+        `,
+      });
+
+      if (error) {
+        console.error("Resend email error:", error);
+      } else {
+        console.log("Welcome email sent successfully:", data.id);
+      }
+    } catch (emailError) {
+      console.error("Registration email error:", emailError);
+    }
 
     res.status(201).json({
       message: "Registration successful",
@@ -253,180 +276,6 @@ app.post("/api/register", async (req, res) => {
     });
   }
 });
-
-// ===========================
-// Forgot Password
-// ===========================
-
-app.post("/api/forgot-password", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    const user = await User.findOne({ email });
-
-    // Never reveal whether email exists
-    if (!user) {
-      return res.json({
-        message:
-          "If an account exists, a password reset link has been generated.",
-      });
-    }
-
-    const token = crypto.randomBytes(32).toString("hex");
-
-    user.resetPasswordToken = token;
-    user.resetPasswordExpires = Date.now() + 1000 * 60 * 30; // 30 mins
-
-    await user.save();
-
-    const resetLink = `http://localhost:5173/reset-password?token=${token}`;
-
-    await transporter.sendMail({
-      from: `"BitcoinVault Security" <${process.env.EMAIL_USER}>`,
-      to: user.email,
-      subject: "BitcoinVault Security • Password Reset Request",
-
-      text: `
-Hello ${user.name},
-
-We received a request to reset your BitcoinVault account password.
-
-Reset your password by visiting the link below:
-
-${resetLink}
-
-This password reset link will expire in 30 minutes.
-
-If you did not request a password reset, you can safely ignore this email. Your account remains secure.
-
-----------------------------------------
-BitcoinVault Security Team
-Automated Security Email
-Please do not reply to this message.
-  `,
-
-      html: `
-  <div style="max-width:650px;margin:auto;background:#ffffff;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;font-family:Arial,Helvetica,sans-serif;">
-
-    <div style="background:#0B1120;padding:30px;text-align:center;">
-      <h1 style="color:#f59e0b;margin:0;">
-        ₿ BitcoinVault
-      </h1>
-
-      <p style="color:#d1d5db;margin-top:10px;font-size:15px;">
-        Secure Crypto Investment Platform
-      </p>
-    </div>
-
-    <div style="padding:40px;">
-
-      <h2 style="margin-top:0;color:#111827;">
-        Password Reset Request
-      </h2>
-
-      <p style="color:#374151;font-size:16px;">
-        Hello <strong>${user.name}</strong>,
-      </p>
-
-      <p style="color:#4b5563;line-height:1.8;">
-        We received a request to reset the password for your
-        <strong>BitcoinVault</strong> account.
-      </p>
-
-      <p style="color:#4b5563;line-height:1.8;">
-        Click the secure button below to create a new password.
-      </p>
-
-      <div style="text-align:center;margin:40px 0;">
-
-        <a
-          href="${resetLink}"
-          style="
-            background:#f59e0b;
-            color:#111827;
-            padding:16px 34px;
-            text-decoration:none;
-            font-weight:bold;
-            border-radius:8px;
-            display:inline-block;
-            font-size:16px;
-          "
-        >
-          Reset My Password
-        </a>
-
-      </div>
-
-      <p style="color:#6b7280;font-size:14px;line-height:1.8;">
-        This secure link will expire in
-        <strong>30 minutes</strong>.
-      </p>
-
-      <p style="color:#6b7280;font-size:14px;line-height:1.8;">
-        If you didn't request a password reset,
-        you don't need to do anything.
-        Your account remains safe.
-      </p>
-
-      <div style="
-        margin-top:35px;
-        padding:18px;
-        background:#fff7ed;
-        border-left:4px solid #f59e0b;
-        border-radius:6px;
-      ">
-        <strong style="color:#92400e;">
-          Security Tip
-        </strong>
-
-        <p style="margin-top:10px;color:#92400e;font-size:14px;line-height:1.7;">
-          BitcoinVault will never ask for your password,
-          recovery code, or verification codes via email.
-          Never share your login credentials with anyone.
-        </p>
-      </div>
-
-    </div>
-
-    <div style="
-      background:#f9fafb;
-      padding:25px;
-      text-align:center;
-      border-top:1px solid #e5e7eb;
-    ">
-
-      <p style="margin:0;font-size:13px;color:#6b7280;">
-        BitcoinVault Security Team
-      </p>
-
-      <p style="margin-top:8px;font-size:12px;color:#9ca3af;">
-        This is an automated security email.
-        Please do not reply to this message.
-      </p>
-
-      <p style="margin-top:15px;font-size:12px;color:#9ca3af;">
-        © ${new Date().getFullYear()} BitcoinVault. All rights reserved.
-      </p>
-
-    </div>
-
-  </div>
-  `,
-    });
-
-    res.json({
-      message: "Password reset email sent successfully.",
-    });
-  } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
-  }
-});
-
-// ===========================
-// Reset Password
-// ===========================
 
 app.post("/api/reset-password", async (req, res) => {
   try {

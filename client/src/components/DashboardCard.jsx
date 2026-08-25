@@ -1,69 +1,94 @@
-import { Box, Text, Flex } from "@chakra-ui/react";
+import { Box, Flex, Text } from "@chakra-ui/react";
 import {
-  FiDollarSign,
-  FiTrendingUp,
   FiArrowUpRight,
   FiClock,
+  FiDollarSign,
+  FiTrendingUp,
 } from "react-icons/fi";
+
 function DashboardCard({ title, value }) {
-  let icon = <FiDollarSign size={22} />;
-  let iconColor = "green.400";
-let glowColor = "rgba(34,197,94,0.35)";
+  let icon = <FiDollarSign size={19} />;
+  let iconColor = "green.300";
+  let glowColor = "rgba(34,197,94,0.18)";
 
   if (title.includes("Deposit")) {
-    icon = <FiTrendingUp size={22} />;
-    iconColor = "blue.400";
-glowColor = "rgba(59,130,246,0.35)";
+    icon = <FiTrendingUp size={19} />;
+    iconColor = "blue.300";
+    glowColor = "rgba(59,130,246,0.18)";
   }
 
   if (title.includes("Withdrawal")) {
-    icon = <FiArrowUpRight size={22} />;
-    iconColor = "red.400";
-glowColor = "rgba(239,68,68,0.35)";
+    icon = <FiArrowUpRight size={19} />;
+    iconColor = "red.300";
+    glowColor = "rgba(239,68,68,0.18)";
   }
 
   if (title.includes("Pending")) {
-    icon = <FiClock size={22} />;
-    iconColor = "orange.400";
-glowColor = "rgba(251,146,60,0.35)";
+    icon = <FiClock size={19} />;
+    iconColor = "orange.300";
+    glowColor = "rgba(251,146,60,0.18)";
   }
+
   return (
     <Box
-      p={6}
-      borderRadius="20px"
-      bg="rgba(255,255,255,0.04)"
-      border="1px solid rgba(255,255,255,0.08)"
-      color="white"
-      transition="all 0.3s ease"
-      boxShadow="0 8px 24px rgba(0,0,0,0.25)"
+      h="100%"
+      minW="0"
+      p={{ base: 4, sm: 5, md: 5 }}
+      border="1px solid"
+      borderColor="whiteAlpha.100"
+      borderRadius={{ base: "16px", md: "18px" }}
+      bg="rgba(255,255,255,0.035)"
+      backdropFilter="blur(12px)"
+      boxShadow="0 10px 30px rgba(0,0,0,0.14)"
+      transition="all 0.2s ease"
       _hover={{
-        transform: "translateY(-8px)",
-        boxShadow: "0 18px 40px rgba(0,0,0,0.45)",
-        borderColor: "blue.400",
+        transform: "translateY(-3px)",
+        borderColor: "whiteAlpha.200",
+        boxShadow: "0 16px 34px rgba(0,0,0,0.20)",
+        bg: "rgba(255,255,255,0.05)",
       }}
     >
-      <Flex justify="space-between" align="center" mb={4}>
+      <Flex
+        align="center"
+        justify="space-between"
+        gap={3}
+        mb={{ base: 4, md: 5 }}
+      >
         <Text
-          fontSize="sm"
-          color="gray.400"
+          minW="0"
+          fontSize={{ base: "xs", md: "sm" }}
+          fontWeight="600"
+          color="gray.500"
           textTransform="uppercase"
-          letterSpacing="1px"
+          letterSpacing="0.08em"
+          noOfLines={1}
         >
           {title}
         </Text>
 
-        <Box
-  p={2.5}
-  borderRadius="12px"
-  bg="rgba(255,255,255,0.06)"
-  color={iconColor}
-  boxShadow={`0 0 18px ${glowColor}`}
->
-  {icon}
-</Box>
+        <Flex
+          flexShrink={0}
+          align="center"
+          justify="center"
+          w={{ base: "38px", md: "40px" }}
+          h={{ base: "38px", md: "40px" }}
+          borderRadius="12px"
+          bg="whiteAlpha.50"
+          color={iconColor}
+          boxShadow={`0 0 22px ${glowColor}`}
+        >
+          {icon}
+        </Flex>
       </Flex>
 
-      <Text fontSize="3xl" fontWeight="bold" color="white">
+      <Text
+        fontSize={{ base: "2xl", sm: "3xl" }}
+        fontWeight="800"
+        letterSpacing="-0.03em"
+        lineHeight="1.05"
+        color="white"
+        noOfLines={1}
+      >
         {value}
       </Text>
     </Box>
